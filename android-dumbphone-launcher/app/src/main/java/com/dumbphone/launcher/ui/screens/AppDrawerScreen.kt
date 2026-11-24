@@ -1,5 +1,7 @@
 package com.dumbphone.launcher.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -156,15 +159,35 @@ fun AppDrawerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { viewModel.launchApp(app.packageName) }
-                                .padding(horizontal = 20.dp, vertical = 13.dp),
+                                .padding(horizontal = 18.dp, vertical = 11.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = app.label,
-                                style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
-                                color = Color.White
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .clip(RoundedCornerShape(9.dp))
+                                        .background(Color.White.copy(alpha = 0.15f))
+                                        .border(0.75.dp, Color.White.copy(alpha = 0.40f), RoundedCornerShape(9.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = app.label.take(1).uppercase(),
+                                        color = Color.White,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        style = Typography.titleSmall.copy(shadow = GlassTextShadow)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(14.dp))
+                                Text(
+                                    text = app.label,
+                                    style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
 
                             Text(
                                 text = "Launch ›",

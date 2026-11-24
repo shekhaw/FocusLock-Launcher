@@ -71,6 +71,9 @@ dependencies {
     // DataStore for preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    // Dynamic Animation for Spring physics in Liquid Glass
+    implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

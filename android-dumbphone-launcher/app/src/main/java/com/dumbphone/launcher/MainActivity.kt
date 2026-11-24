@@ -4,7 +4,9 @@ import android.graphics.BitmapFactory
 import android.graphics.Color as AndroidColor
 import android.os.Build
 import android.os.Bundle
+import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -15,18 +17,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.dumbphone.launcher.data.ScreenState
 import com.dumbphone.launcher.ui.components.AliveWallpaper
+import com.dumbphone.launcher.ui.components.LocalWallpaperContainer
 import com.dumbphone.launcher.ui.screens.AppDrawerScreen
 import com.dumbphone.launcher.ui.screens.FrictionGateScreen
 import com.dumbphone.launcher.ui.screens.HomeScreen
@@ -71,34 +74,75 @@ class MainActivity : ComponentActivity() {
                     } else null
                 }
 
+                var wallpaperContainer by remember { mutableStateOf<ViewGroup?>(null) }
+
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Continuous Wallpaper Layer: Shared seamlessly across Home, Drawer, Settings, and Gate
-                    if (customWallpaperBitmap != null) {
-                        Image(
-                            bitmap = customWallpaperBitmap.asImageBitmap(),
-                            contentDescription = "Wallpaper",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.30f))
-                        )
-                    } else {
-                        AliveWallpaper(theme = wallpaperTheme)
-                    }
+                    // Continuous Wallpaper Layer: Hosted in FrameLayout as sampling source for LiquidGlass
+                    AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { ctx ->
+                            FrameLayout(ctx).apply {
+                                val composeView = ComposeView(ctx).apply {
+                                    setContent {
+                                        if (customWallpaperBitmap != null) {
+                                            Image(
+                                                bitmap = customWallpaperBitmap.asImageBitmap(),
+                                                contentDescription = "Wallpaper",
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .background(Color.Black.copy(alpha = 0.30f))
+                                            )
+                                        } else {
+                                            AliveWallpaper(theme = wallpaperTheme)
+                                        }
+                                    }
+                                }
+                                addView(
+                                    composeView,
+                                    FrameLayout.LayoutParams.MATCH_PARENT,
+                                    FrameLayout.LayoutParams.MATCH_PARENT
+                                )
+                                wallpaperContainer = this
+                            }
+                        },
+                        update = { frameLayout ->
+                            val composeView = frameLayout.getChildAt(0) as? ComposeView
+                            composeView?.setContent {
+                                if (customWallpaperBitmap != null) {
+                                    Image(
+                                        bitmap = customWallpaperBitmap.asImageBitmap(),
+                                        contentDescription = "Wallpaper",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.30f))
+                                    )
+                                } else {
+                                    AliveWallpaper(theme = wallpaperTheme)
+                                }
+                            }
+                        }
+                    )
 
                     // Active screen rendered in transparent surface over the shared wallpaper
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = Color.Transparent
-                    ) {
-                        when (screenState) {
-                            ScreenState.HOME -> HomeScreen(viewModel = viewModel)
-                            ScreenState.GATE -> FrictionGateScreen(viewModel = viewModel)
-                            ScreenState.DRAWER -> AppDrawerScreen(viewModel = viewModel)
-                            ScreenState.SETTINGS -> SettingsScreen(viewModel = viewModel)
+                    CompositionLocalProvider(LocalWallpaperContainer provides wallpaperContainer) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = Color.Transparent
+                        ) {
+                            when (screenState) {
+                                ScreenState.HOME -> HomeScreen(viewModel = viewModel)
+                                ScreenState.GATE -> FrictionGateScreen(viewModel = viewModel)
+                                ScreenState.DRAWER -> AppDrawerScreen(viewModel = viewModel)
+                                ScreenState.SETTINGS -> SettingsScreen(viewModel = viewModel)
+                            }
                         }
                     }
                 }

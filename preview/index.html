@@ -140,6 +140,82 @@
       z-index: 100;
     }
 
+    /* AUTHENTIC BOTTOM HORIZONTAL macOS DOCK SHELF */
+    .macos-dock-shelf-horizontal {
+      position: relative;
+      height: 82px;
+      width: 100%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.08) 100%);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border-radius: 26px;
+      border: 1.25px solid rgba(255, 255, 255, 0.25);
+      border-top-color: rgba(255, 255, 255, 0.85);
+      border-bottom-color: rgba(255, 255, 255, 0.10);
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.65),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.75),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.10);
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 0 8px;
+      overflow: hidden;
+    }
+
+    .dock-app-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      cursor: pointer;
+      transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dock-app-slot:hover {
+      transform: translateY(-4px) scale(1.08);
+    }
+    .dock-app-squircle {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.12) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-top-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .dock-app-squircle.empty {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px dashed rgba(255, 255, 255, 0.35);
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.9rem;
+    }
+    .dock-app-label {
+      font-size: 0.62rem;
+      color: #ffffff;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 48px;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    }
+    .dock-app-pip {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      margin-top: 2px;
+    }
+
     /* REAL TRANSLUCENT macOS DOCK GLASS TRAY */
     .macos-dock-tray {
       position: relative;
@@ -379,7 +455,7 @@
     <div class="island"></div>
 
     <!-- 1. HOME SCREEN -->
-    <div id="screen-home" class="screen active" onmousedown="startLongPress()" onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()">
+    <div id="screen-home" class="screen active" style="justify-content: space-between;" onmousedown="startLongPress()" onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()">
       <!-- Floating Clock on wallpaper -->
       <div class="floating-clock">
         <div class="clock-time" id="home-clock">16:35</div>
@@ -387,19 +463,20 @@
         <div class="focus-quote">“Simplicity is the ultimate sophistication.”</div>
       </div>
 
-      <!-- Real Translucent macOS Dock Glass Shelf -->
-      <div class="macos-dock-tray" id="macos-dock-container">
-        <div class="glass-caustic-sheen"></div>
-        <div class="macos-dock-content" id="dock-rows-content"></div>
-      </div>
-
-      <!-- Bottom Actions -->
-      <div class="home-bottom">
-        <button class="macos-pill-btn btn-vault" onclick="event.stopPropagation(); openGate()">
+      <!-- Bottom Shelf Section: Authentic Horizontal macOS Dock -->
+      <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: auto;">
+        <button class="macos-pill-btn btn-vault" onclick="event.stopPropagation(); openGate()" style="padding: 9px 20px; font-size: 0.8rem;">
           <span>🔒</span>
           <span>Access Other Apps</span>
         </button>
-        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.5); margin-top: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+
+        <!-- Real Translucent Horizontal macOS Dock Shelf -->
+        <div class="macos-dock-shelf-horizontal" id="dock-shelf-container">
+          <div class="glass-caustic-sheen"></div>
+          <div id="dock-shelf-content" style="display: flex; justify-content: space-evenly; align-items: center; width: 100%; position: relative; z-index: 2;"></div>
+        </div>
+
+        <div style="font-size: 0.68rem; color: rgba(255,255,255,0.5); text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
           💡 Long-press empty screen area for Settings
         </div>
         <div class="home-indicator"></div>
@@ -606,42 +683,33 @@
     updateClock();
 
     function renderHomeApps() {
-      const container = document.getElementById("dock-rows-content");
+      const container = document.getElementById("dock-shelf-content");
+      if (!container) return;
       container.innerHTML = "";
 
       for (let i = 0; i < 6; i++) {
         const appId = homeApps[i];
         const app = ALL_AVAILABLE_APPS.find(a => a.id === appId);
 
-        const row = document.createElement("div");
-        row.className = "macos-dock-row";
+        const slot = document.createElement("div");
+        slot.className = "dock-app-slot";
         
         if (app) {
-          row.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 14px;">
-              <span class="dock-dot"></span>
-              <span class="app-slot-name">${app.name}</span>
-            </div>
-            <span class="app-slot-arrow">›</span>
+          slot.innerHTML = `
+            <div class="dock-app-squircle">${app.name.charAt(0)}</div>
+            <div class="dock-app-label">${app.name}</div>
+            <div class="dock-app-pip"></div>
           `;
-          row.onclick = (e) => { e.stopPropagation(); alert(`Launched ${app.name}`); };
+          slot.onclick = (e) => { e.stopPropagation(); alert(`Launched ${app.name}`); };
         } else {
-          row.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 14px;">
-              <span class="dock-dot empty"></span>
-              <span class="app-slot-name" style="color: rgba(255,255,255,0.45);">+ Add Slot ${i+1}</span>
-            </div>
-            <span class="app-slot-arrow">+</span>
+          slot.innerHTML = `
+            <div class="dock-app-squircle empty">+</div>
+            <div class="dock-app-label" style="color: rgba(255,255,255,0.45);">Add</div>
+            <div style="height: 5px;"></div>
           `;
-          row.onclick = (e) => { e.stopPropagation(); openSettings(); };
+          slot.onclick = (e) => { e.stopPropagation(); openSettings(); };
         }
-        container.appendChild(row);
-
-        if (i < 5) {
-          const div = document.createElement("div");
-          div.className = "macos-dock-divider";
-          container.appendChild(div);
-        }
+        container.appendChild(slot);
       }
     }
 
