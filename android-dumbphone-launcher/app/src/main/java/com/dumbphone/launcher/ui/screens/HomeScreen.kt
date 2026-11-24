@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
 import com.dumbphone.launcher.data.ScreenState
 import com.dumbphone.launcher.ui.components.AliveWallpaper
+import com.dumbphone.launcher.ui.components.liquidGlassRefraction
 import com.dumbphone.launcher.ui.theme.*
 import com.dumbphone.launcher.ui.viewmodel.LauncherViewModel
 import kotlinx.coroutines.delay
@@ -159,29 +160,40 @@ fun HomeScreen(
             ) {
                 Box(
                     modifier = Modifier
+                        .liquidGlassRefraction(
+                            cornerRadiusPx = 72f,
+                            refractionHeight = 28f,
+                            refractionAmount = 20f,
+                            chromaticAberration = 0.6f,
+                            depthEffect = 0.25f,
+                            blurRadius = 10f
+                        )
                         .clip(RoundedCornerShape(50))
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    Color.White.copy(alpha = 0.18f),
-                                    Color.White.copy(alpha = 0.08f)
+                                    Color.White.copy(alpha = 0.22f),
+                                    Color.White.copy(alpha = 0.09f)
                                 )
                             )
                         )
                         .border(
                             BorderStroke(
-                                1.dp,
-                                Brush.verticalGradient(
+                                1.2.dp,
+                                Brush.linearGradient(
                                     listOf(
-                                        Color.White.copy(alpha = 0.50f),
-                                        Color.White.copy(alpha = 0.15f)
+                                        Color.White.copy(alpha = 0.85f),
+                                        GlassChromaticCyan,
+                                        Color.White.copy(alpha = 0.30f),
+                                        GlassChromaticMagenta,
+                                        Color.White.copy(alpha = 0.12f)
                                     )
                                 )
                             ),
                             shape = RoundedCornerShape(50)
                         )
                         .clickable { viewModel.openFrictionGate() }
-                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                        .padding(horizontal = 26.dp, vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
@@ -191,7 +203,7 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Lock",
-                            tint = Color.White.copy(alpha = 0.9f),
+                            tint = Color.White.copy(alpha = 0.95f),
                             modifier = Modifier.size(15.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -199,7 +211,14 @@ fun HomeScreen(
                             text = "Access Other Apps",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color.White.copy(alpha = 0.9f)
+                            color = Color.White,
+                            style = Typography.bodyMedium.copy(
+                                shadow = androidx.compose.ui.graphics.Shadow(
+                                    color = GlassTextRefractionGlow,
+                                    offset = androidx.compose.ui.geometry.Offset(0f, 1f),
+                                    blurRadius = 2.5f
+                                )
+                            )
                         )
                     }
                 }
@@ -209,9 +228,13 @@ fun HomeScreen(
 }
 
 /**
- * macOS Dock Glass Tray:
- * Floating translucent squircle container with specular rim highlight reflection,
- * subtle inner depth, and hairline glass item dividers.
+ * Real Physical macOS Dock Glass Tray:
+ * Implements physical glass optics:
+ * 1. Caustic Light Banding: directional luminous light streaks refracted through the glass slab.
+ * 2. Specular Fresnel Horizon: intense top arc glare catching overhead ceiling light.
+ * 3. Optical Depth Trough: inner refraction shadow line simulating 6mm glass thickness.
+ * 4. Chromatic Dispersion Rim: razor-sharp specular border with subtle cyan/magenta prism split.
+ * 5. Refracted Typography & 3D Glass Pip: crystalline submerged text styling.
  */
 @Composable
 fun MacDockGlassTray(
@@ -225,13 +248,21 @@ fun MacDockGlassTray(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 20.dp,
+                elevation = 24.dp,
                 shape = dockShape,
-                ambientColor = Color.Black.copy(alpha = 0.6f),
-                spotColor = Color.Black.copy(alpha = 0.5f)
+                ambientColor = Color.Black.copy(alpha = 0.65f),
+                spotColor = Color.White.copy(alpha = 0.25f)
+            )
+            .liquidGlassRefraction(
+                cornerRadiusPx = 84f,
+                refractionHeight = 48f,
+                refractionAmount = 32f,
+                chromaticAberration = 0.85f,
+                depthEffect = 0.32f,
+                blurRadius = 14f
             )
             .clip(dockShape)
-            // macOS Frosted Glass Floor
+            // Layer 1: Translucent Glass Medium
             .background(
                 Brush.verticalGradient(
                     listOf(
@@ -240,24 +271,83 @@ fun MacDockGlassTray(
                     )
                 )
             )
-            // macOS Dual-Rim Specular Edge Reflection
+            // Layer 2: Chromatic Dispersion Specular Rim
             .border(
                 BorderStroke(
-                    1.25.dp,
-                    Brush.verticalGradient(
-                        listOf(
+                    1.4.dp,
+                    Brush.linearGradient(
+                        colors = listOf(
                             MacDockBorderTop,
+                            GlassChromaticCyan,
                             MacDockBorderMid,
+                            GlassChromaticMagenta,
                             MacDockBorderBottom
-                        )
+                        ),
+                        start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                        end = androidx.compose.ui.geometry.Offset(800f, 1200f)
                     )
                 ),
                 shape = dockShape
             )
-            .padding(vertical = 4.dp)
     ) {
+        // Layer 3: Caustic Light Banding (Diagonal Luminous Sheen Bands)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            GlassCausticTrough,
+                            GlassCausticMid,
+                            GlassCausticPeak,
+                            GlassCausticTrough,
+                            GlassCausticPeak.copy(alpha = 0.36f),
+                            GlassCausticMid,
+                            GlassCausticTrough
+                        ),
+                        start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                        end = androidx.compose.ui.geometry.Offset(1000f, 1000f)
+                    )
+                )
+        )
+
+        // Layer 4: Top Specular Glare Arc (Curved Glass Horizon)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.42f),
+                            Color.White.copy(alpha = 0.10f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        // Layer 5: Inner Refractive Trough Shadow (Physical Glass Slab Thickness)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 1.2.dp, start = 2.dp, end = 2.dp)
+                .height(3.dp)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            GlassInnerBevelShadow,
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        // Layer 6: Inside Rows with Refracted Typography
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
         ) {
             homeApps.forEachIndexed { index, app ->
                 MacDockAppRow(
@@ -266,11 +356,19 @@ fun MacDockGlassTray(
                     onClick = { onSlotClick(index, app) }
                 )
                 if (index < homeApps.lastIndex) {
-                    HorizontalDivider(
-                        color = MacDockDivider,
-                        thickness = 0.75.dp,
+                    // Dual-tone groove divider (specular bevel + shadow trough)
+                    Column(
                         modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                    ) {
+                        HorizontalDivider(
+                            color = MacDockDivider,
+                            thickness = 0.75.dp
+                        )
+                        HorizontalDivider(
+                            color = MacDockDividerShadow,
+                            thickness = 0.75.dp
+                        )
+                    }
                 }
             }
         }
@@ -278,7 +376,7 @@ fun MacDockGlassTray(
 }
 
 /**
- * Single Row inside the macOS Dock Tray
+ * Single Row inside the macOS Dock Tray with Submerged Refracted Typography
  */
 @Composable
 fun MacDockAppRow(
@@ -299,20 +397,46 @@ fun MacDockAppRow(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Subtle glass bullet indicator
+            // 3D Luminous Glass Pip Indicator
             Box(
                 modifier = Modifier
-                    .size(6.dp)
+                    .size(7.dp)
                     .clip(RoundedCornerShape(50))
                     .background(
-                        if (isAssigned) Color.White.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.2f)
+                        if (isAssigned) {
+                            Brush.radialGradient(
+                                listOf(
+                                    Color.White,
+                                    GlassChromaticCyan,
+                                    Color.White.copy(alpha = 0.6f)
+                                )
+                            )
+                        } else {
+                            Brush.radialGradient(
+                                listOf(
+                                    Color.White.copy(alpha = 0.25f),
+                                    Color.Transparent
+                                )
+                            )
+                        }
+                    )
+                    .border(
+                        0.5.dp,
+                        if (isAssigned) Color.White.copy(alpha = 0.9f) else Color.White.copy(alpha = 0.2f),
+                        RoundedCornerShape(50)
                     )
             )
             Spacer(modifier = Modifier.width(14.dp))
             if (app != null) {
                 Text(
                     text = app.label,
-                    style = Typography.bodyLarge,
+                    style = Typography.bodyLarge.copy(
+                        shadow = androidx.compose.ui.graphics.Shadow(
+                            color = GlassTextRefractionGlow,
+                            offset = androidx.compose.ui.geometry.Offset(0f, 1f),
+                            blurRadius = 3f
+                        )
+                    ),
                     color = Color.White,
                     fontWeight = FontWeight.Normal
                 )
@@ -329,7 +453,7 @@ fun MacDockAppRow(
             Text(
                 text = "›",
                 fontSize = 18.sp,
-                color = Color.White.copy(alpha = 0.45f),
+                color = Color.White.copy(alpha = 0.55f),
                 fontWeight = FontWeight.Light
             )
         } else {

@@ -20,14 +20,26 @@ val GlassWhiteMedium = Color(0x28FFFFFF)     // 16% white
 val GlassWhiteBorder = Color(0x35FFFFFF)     // 21% white
 val GlassWhiteHighlight = Color(0x55FFFFFF)  // 33% white
 
-// macOS Dock Glass Palette & Highlights
-val MacDockGlassTop = Color(0x2BFFFFFF)       // 17% white frosted top
-val MacDockGlassBottom = Color(0x14FFFFFF)    // 8% white deep floor
-val MacDockBorderTop = Color(0x8CFFFFFF)      // 55% white crisp specular top reflection
-val MacDockBorderMid = Color(0x30FFFFFF)      // 19% white mid rim
-val MacDockBorderBottom = Color(0x12FFFFFF)   // 7% white subtle bottom bevel
-val MacDockDivider = Color(0x18FFFFFF)        // Hairline glass divider between dock items
-val MacDockItemActive = Color(0x2EFFFFFF)     // Subtle highlight on tap
+// macOS Dock Physical Glass & Optical Refraction Palette
+val MacDockGlassTop = Color(0x35FFFFFF)           // 21% white frosted top
+val MacDockGlassBottom = Color(0x18FFFFFF)        // 9% white deep floor
+val MacDockBorderTop = Color(0xD0FFFFFF)          // 82% white crisp specular top reflection
+val MacDockBorderMid = Color(0x45FFFFFF)          // 27% white mid rim
+val MacDockBorderBottom = Color(0x1AFFFFFF)       // 10% white subtle bottom bevel
+val MacDockDivider = Color(0x20FFFFFF)            // Hairline glass divider
+val MacDockDividerShadow = Color(0x30000000)      // Refraction bevel shadow under divider
+val MacDockItemActive = Color(0x35FFFFFF)         // Highlight on tap
+
+// Optical Caustics, Fresnel Chromatic Dispersion & Light Banding
+val GlassCausticPeak = Color(0x52FFFFFF)          // High-intensity caustic light band (32%)
+val GlassCausticMid = Color(0x24FFFFFF)           // Mid caustic sheen (14%)
+val GlassCausticTrough = Color(0x08FFFFFF)        // Deep refraction valley (3%)
+val GlassChromaticCyan = Color(0x5000F5FF)         // Optical dispersion cyan edge
+val GlassChromaticMagenta = Color(0x38FF1493)      // Optical dispersion magenta edge
+val GlassInnerBevelShadow = Color(0x40000000)      // Inner refractive depth shadow
+val GlassTextRefractionGlow = Color(0x80FFFFFF)    // Refractive specular text highlight
+val GlassTextChromaticShadow = Color(0x4000E5FF)   // Text refraction dispersion fringe
+
 
 
 enum class WallpaperTheme(val displayName: String) {
