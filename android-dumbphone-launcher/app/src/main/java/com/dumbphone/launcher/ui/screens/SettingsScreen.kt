@@ -1,15 +1,11 @@
 package com.dumbphone.launcher.ui.screens
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,10 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,6 +23,10 @@ import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
 import com.dumbphone.launcher.data.ScreenState
 import com.dumbphone.launcher.data.UnlockGateType
+import com.dumbphone.launcher.ui.components.GlassTextShadow
+import com.dumbphone.launcher.ui.components.MacDockGlassCard
+import com.dumbphone.launcher.ui.components.MacDockGlassDivider
+import com.dumbphone.launcher.ui.components.MacDockGlassPill
 import com.dumbphone.launcher.ui.theme.*
 import com.dumbphone.launcher.ui.viewmodel.LauncherViewModel
 
@@ -47,7 +44,6 @@ fun SettingsScreen(
     val currentPin by viewModel.targetPin.collectAsState()
     val wallpaperTheme by viewModel.wallpaperTheme.collectAsState()
     val hasCustomWallpaper by viewModel.hasCustomWallpaper.collectAsState()
-    val wallpaperUpdateTrigger by viewModel.wallpaperUpdateTrigger.collectAsState()
 
     var phraseText by remember(currentPhrase) { mutableStateOf(currentPhrase) }
     var pinText by remember(currentPin) { mutableStateOf(currentPin) }
@@ -63,190 +59,151 @@ fun SettingsScreen(
         }
     }
 
-    // Custom wallpaper preview bitmap
-    val customWallpaperBitmap = remember(hasCustomWallpaper, wallpaperUpdateTrigger) {
-        if (hasCustomWallpaper) {
-            val file = viewModel.getCustomWallpaperFile()
-            if (file.exists() && file.length() > 0) {
-                try {
-                    BitmapFactory.decodeFile(file.absolutePath)
-                } catch (e: Exception) {
-                    null
-                }
-            } else null
-        } else null
-    }
-
+    // Transparent container: wallpaper from MainActivity is visible underneath!
     Box(
         modifier = modifier
             .fillMaxSize()
-            .then(
-                if (customWallpaperBitmap == null) {
-                    Modifier.background(wallpaperTheme.getBackgroundBrush())
-                } else {
-                    Modifier
-                }
-            )
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 14.dp)
     ) {
-        // Background photo if set
-        if (customWallpaperBitmap != null) {
-            Image(
-                bitmap = customWallpaperBitmap.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.65f))
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 14.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Launcher Settings",
-                    style = Typography.titleLarge,
-                    color = Color.White
+                    style = Typography.titleLarge.copy(shadow = GlassTextShadow),
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
                 )
-                Button(
-                    onClick = { viewModel.navigateTo(ScreenState.HOME) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = GlassWhiteMedium,
-                        contentColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+
+                MacDockGlassPill(
+                    modifier = Modifier
+                        .clickable { viewModel.navigateTo(ScreenState.HOME) }
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
                 ) {
-                    Text("Done")
+                    Text(
+                        text = "Done ✓",
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                    )
                 }
             }
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Section 0: Wallpaper & Background Customization
                 item {
                     Text(
                         text = "WALLPAPER & BACKGROUND",
-                        style = Typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.6f)
+                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                        color = Color.White.copy(alpha = 0.65f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(22.dp))
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(MacDockGlassTop, MacDockGlassBottom)
-                                )
-                            )
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    Brush.verticalGradient(
-                                        listOf(MacDockBorderTop, MacDockBorderMid)
-                                    )
-                                ),
-                                shape = RoundedCornerShape(22.dp)
-                            )
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    MacDockGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 24.dp
                     ) {
-                        // Custom Photo Choice
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Custom Photo Wallpaper",
-                                    style = Typography.bodyLarge,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = if (hasCustomWallpaper) "Active: Custom Photo" else "Choose any photo from your device",
-                                    style = Typography.labelSmall,
-                                    color = if (hasCustomWallpaper) Color(0xFF4ADE80) else Color.White.copy(alpha = 0.5f)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Button(
-                                onClick = { photoPickerLauncher.launch("image/*") },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.White.copy(alpha = 0.22f),
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Text("Choose Photo")
-                            }
-                        }
-
-                        if (hasCustomWallpaper) {
-                            Button(
-                                onClick = { viewModel.clearCustomWallpaper() },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0x33EF4444),
-                                    contentColor = Color(0xFFFCA5A5)
-                                ),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Remove Photo & Use Fluid Wallpaper")
-                            }
-                        }
-
-                        HorizontalDivider(
-                            color = MacDockDivider,
-                            thickness = 0.8.dp,
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-
-                        Text(
-                            text = "LIVING FLUID PRESETS",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White.copy(alpha = 0.5f)
-                        )
-
-                        WallpaperTheme.values().forEach { theme ->
-                            val isSelected = (!hasCustomWallpaper && theme == wallpaperTheme)
+                            // Custom Photo Choice
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) Color.White.copy(alpha = 0.20f) else Color.Transparent)
-                                    .clickable { viewModel.setWallpaperTheme(theme) }
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = theme.displayName,
-                                    style = Typography.bodyMedium,
-                                    color = Color.White
-                                )
-                                if (isSelected) {
-                                    Text("✓ Active", style = Typography.labelSmall, color = Color.White)
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Custom Photo Wallpaper",
+                                        style = Typography.bodyLarge.copy(shadow = GlassTextShadow),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = if (hasCustomWallpaper) "Active: Custom Photo" else "Choose any photo from gallery",
+                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                        color = if (hasCustomWallpaper) Color(0xFF4ADE80) else Color.White.copy(alpha = 0.55f)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                MacDockGlassPill(
+                                    modifier = Modifier
+                                        .clickable { photoPickerLauncher.launch("image/*") }
+                                        .padding(horizontal = 14.dp, vertical = 7.dp)
+                                ) {
+                                    Text(
+                                        text = "Choose Photo 📷",
+                                        fontSize = 12.sp,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium,
+                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                                    )
+                                }
+                            }
+
+                            if (hasCustomWallpaper) {
+                                MacDockGlassPill(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { viewModel.clearCustomWallpaper() }
+                                        .padding(vertical = 10.dp)
+                                ) {
+                                    Text(
+                                        text = "Remove Photo & Use Fluid Wallpaper",
+                                        fontSize = 13.sp,
+                                        color = Color(0xFFFCA5A5),
+                                        fontWeight = FontWeight.Medium,
+                                        style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+
+                            MacDockGlassDivider(paddingHorizontal = 0.dp)
+
+                            Text(
+                                text = "LIVING FLUID PRESETS",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White.copy(alpha = 0.55f),
+                                style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                            )
+
+                            WallpaperTheme.values().forEach { theme ->
+                                val isSelected = (!hasCustomWallpaper && theme == wallpaperTheme)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (isSelected) Color.White.copy(alpha = 0.18f) else Color.Transparent)
+                                        .clickable { viewModel.setWallpaperTheme(theme) }
+                                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = theme.displayName,
+                                        style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                        color = Color.White
+                                    )
+                                    if (isSelected) {
+                                        Text("✓ Active", style = Typography.labelSmall.copy(shadow = GlassTextShadow), color = Color.White)
+                                    }
                                 }
                             }
                         }
@@ -257,52 +214,45 @@ fun SettingsScreen(
                 item {
                     Text(
                         text = "HOME SCREEN APPS (UP TO 6 IN DOCK)",
-                        style = Typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.6f)
+                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                        color = Color.White.copy(alpha = 0.65f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(22.dp))
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(MacDockGlassTop, MacDockGlassBottom)
-                                )
-                            )
-                            .border(
-                                BorderStroke(
-                                    1.dp,
-                                    Brush.verticalGradient(
-                                        listOf(MacDockBorderTop, MacDockBorderMid)
-                                    )
-                                ),
-                                shape = RoundedCornerShape(22.dp)
-                            )
-                            .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    MacDockGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 24.dp
                     ) {
-                        for (i in 0 until 6) {
-                            val app = homeApps.getOrNull(i)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { activeSlotToAssign = i }
-                                    .padding(vertical = 6.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Slot ${i + 1}: ${app?.label ?: "(Empty Slot)"}",
-                                    style = Typography.bodyMedium,
-                                    color = if (app != null) Color.White else Color.White.copy(alpha = 0.4f)
-                                )
-                                Text(
-                                    text = "Change ✎",
-                                    style = Typography.labelSmall,
-                                    color = Color.White.copy(alpha = 0.8f)
-                                )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            for (i in 0 until 6) {
+                                val app = homeApps.getOrNull(i)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { activeSlotToAssign = i }
+                                        .padding(vertical = 6.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Slot ${i + 1}: ${app?.label ?: "(Empty Slot)"}",
+                                        style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                        color = if (app != null) Color.White else Color.White.copy(alpha = 0.45f)
+                                    )
+                                    Text(
+                                        text = "Change ✎",
+                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                        color = Color.White.copy(alpha = 0.85f)
+                                    )
+                                }
+                                if (i < 5) {
+                                    MacDockGlassDivider(paddingHorizontal = 0.dp)
+                                }
                             }
                         }
                     }
@@ -312,8 +262,8 @@ fun SettingsScreen(
                 item {
                     Text(
                         text = "IMPORTANCE GATE CHALLENGE TYPE",
-                        style = Typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.6f)
+                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                        color = Color.White.copy(alpha = 0.65f)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -321,18 +271,33 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        FilterChip(
-                            selected = (gateType == UnlockGateType.PHRASE),
-                            onClick = { viewModel.setGateMode(UnlockGateType.PHRASE) },
-                            label = { Text("Mindful Phrase") },
-                            modifier = Modifier.weight(1f)
-                        )
-                        FilterChip(
-                            selected = (gateType == UnlockGateType.PIN),
-                            onClick = { viewModel.setGateMode(UnlockGateType.PIN) },
-                            label = { Text("Phone PIN") },
-                            modifier = Modifier.weight(1f)
-                        )
+                        MacDockGlassPill(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { viewModel.setGateMode(UnlockGateType.PHRASE) }
+                                .padding(vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = "Mindful Phrase ${if (gateType == UnlockGateType.PHRASE) "✓" else ""}",
+                                style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                color = if (gateType == UnlockGateType.PHRASE) Color.White else Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+
+                        MacDockGlassPill(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { viewModel.setGateMode(UnlockGateType.PIN) }
+                                .padding(vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = "Phone PIN ${if (gateType == UnlockGateType.PIN) "✓" else ""}",
+                                style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                color = if (gateType == UnlockGateType.PIN) Color.White else Color.White.copy(alpha = 0.6f),
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
                     }
                 }
 
@@ -341,81 +306,94 @@ fun SettingsScreen(
                     item {
                         Text(
                             text = "CUSTOM MINDFUL PHRASE",
-                            style = Typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.6f)
+                            style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                            color = Color.White.copy(alpha = 0.65f)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        OutlinedTextField(
-                            value = phraseText,
-                            onValueChange = {
-                                phraseText = it
-                                viewModel.updateCustomPhrase(it)
-                            },
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = GlassWhiteHighlight,
-                                unfocusedBorderColor = GlassWhiteBorder,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                containerColor = GlassWhiteSubtle
-                            ),
-                            shape = RoundedCornerShape(12.dp),
+                        MacDockGlassPill(
                             modifier = Modifier.fillMaxWidth()
-                        )
+                        ) {
+                            OutlinedTextField(
+                                value = phraseText,
+                                onValueChange = {
+                                    phraseText = it
+                                    viewModel.updateCustomPhrase(it)
+                                },
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    containerColor = Color.Transparent
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp)
+                            )
+                        }
                     }
                 } else {
                     item {
                         Text(
                             text = "4-DIGIT PIN PASSCODE",
-                            style = Typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.6f)
+                            style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                            color = Color.White.copy(alpha = 0.65f)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        OutlinedTextField(
-                            value = pinText,
-                            onValueChange = {
-                                if (it.length <= 4 && it.all { ch -> ch.isDigit() }) {
-                                    pinText = it
-                                    if (it.length == 4) {
-                                        viewModel.updatePin(it)
-                                    }
-                                }
-                            },
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = GlassWhiteHighlight,
-                                unfocusedBorderColor = GlassWhiteBorder,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                containerColor = GlassWhiteSubtle
-                            ),
-                            shape = RoundedCornerShape(12.dp),
+                        MacDockGlassPill(
                             modifier = Modifier.fillMaxWidth()
-                        )
+                        ) {
+                            OutlinedTextField(
+                                value = pinText,
+                                onValueChange = {
+                                    if (it.length <= 4 && it.all { ch -> ch.isDigit() }) {
+                                        pinText = it
+                                        if (it.length == 4) {
+                                            viewModel.updatePin(it)
+                                        }
+                                    }
+                                },
+                                colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    containerColor = Color.Transparent
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp)
+                            )
+                        }
                     }
                 }
 
                 // Section 4: System Integration
                 item {
                     Spacer(modifier = Modifier.height(10.dp))
-                    Button(
-                        onClick = {
-                            val intent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
-                            try {
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                val altIntent = Intent(Settings.ACTION_HOME_SETTINGS)
-                                context.startActivity(altIntent)
+                    MacDockGlassPill(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                val intent = Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    val altIntent = Intent(Settings.ACTION_HOME_SETTINGS)
+                                    context.startActivity(altIntent)
+                                }
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = GlassWhiteMedium,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth()
+                            .padding(vertical = 14.dp)
                     ) {
-                        Text("Set as Default Android Home App 📱")
+                        Text(
+                            text = "Set as Default Android Home App 📱",
+                            style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                            color = Color.White,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
                     }
                 }
             }
