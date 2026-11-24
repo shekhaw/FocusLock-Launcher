@@ -919,76 +919,8 @@
 
     function changeSlot(index, appId) {
       homeApps[index] = appId || null;
-      function toggleControlCenter() {
-      const modal = document.getElementById("screen-control-center");
-      modal.style.display = (modal.style.display === "flex") ? "none" : "flex";
-    }
-
-    const WIDGETS = [
-      "☀️ 24°C • Mostly Sunny • H:27° L:16°",
-      "⚡ Battery 85% • 4.2 GB RAM Free",
-      "🌱 42m Focus Today • 3 Mindful Unlocks"
-    ];
-    let currentWidgetIdx = 0;
-    function cycleWidget() {
-      currentWidgetIdx = (currentWidgetIdx + 1) % WIDGETS.length;
-      document.getElementById("home-desktop-widget").innerText = WIDGETS[currentWidgetIdx];
-    }
-
-    function toggleBtn(id) {
-      const el = document.getElementById(id);
-      const sub = el.querySelector("div div:nth-child(2)");
-      if (sub.innerText === "Off") {
-        sub.innerText = "Active";
-        sub.style.color = "#4ade80";
-        el.style.background = "rgba(255,255,255,0.28)";
-      } else {
-        sub.innerText = "Off";
-        sub.style.color = "rgba(255,255,255,0.5)";
-        el.style.background = "linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.08) 100%)";
-      }
-    }
-
-    function togglePlay(btn) {
-      if (btn.innerText.includes("Pause")) {
-        btn.innerText = "▶ Play";
-      } else {
-        btn.innerText = "⏸ Pause";
-      }
-    }
-
-    function attachDockWave() {
-      const shelf = document.getElementById("dock-shelf-container");
-      if (!shelf) return;
-      shelf.onmousemove = (e) => {
-        const rect = shelf.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const slots = shelf.querySelectorAll(".dock-app-slot");
-        const total = slots.length;
-        if (total === 0) return;
-        const slotWidth = rect.width / total;
-        slots.forEach((s, idx) => {
-          const center = (idx + 0.5) * slotWidth;
-          const dist = Math.abs(mouseX - center);
-          const maxDist = slotWidth * 1.6;
-          if (dist < maxDist) {
-            const factor = (maxDist - dist) / maxDist;
-            const scale = 1.0 + 0.36 * factor;
-            const translateY = -12 * factor;
-            s.style.transform = `translateY(${translateY}px) scale(${scale})`;
-          } else {
-            s.style.transform = `translateY(0px) scale(1)`;
-          }
-        });
-      };
-      shelf.onmouseleave = () => {
-        const slots = shelf.querySelectorAll(".dock-app-slot");
-        slots.forEach(s => s.style.transform = `translateY(0px) scale(1)`);
-      };
-    }
-
-    renderHomeApps();
-    attachDockWave();
+      renderHomeApps();
+      renderHomeSettings();
     }
 
     function savePhrase(newPhrase) {
