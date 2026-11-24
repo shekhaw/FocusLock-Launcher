@@ -88,6 +88,10 @@ Set-Content -Path "$projectDir\local.properties" -Value "sdk.dir=$($androidHome 
 & "$gradleDir\bin\gradle.bat" assembleDebug
 
 $outputApk = "$projectDir\app\build\outputs\apk\debug\app-debug.apk"
+$tempApk = Join-Path $env:TEMP "focuslock-build\app\outputs\apk\debug\app-debug.apk"
+if (!(Test-Path $outputApk) -and (Test-Path $tempApk)) {
+    $outputApk = $tempApk
+}
 if (Test-Path $outputApk) {
     $finalApk = "$PSScriptRoot\FocusLock-Liquid.apk"
     Copy-Item -Path $outputApk -Destination $finalApk -Force

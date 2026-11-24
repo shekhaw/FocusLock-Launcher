@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -180,12 +181,14 @@ fun MacDockGlassCard(
 }
 
 /**
- * macOS Dock Glass Pill:
- * Floating capsule pill with physical liquid glass optics.
+ * macOS / iOS Liquid Glass Pill:
+ * Floating capsule pill with physical liquid glass optics, Apple HIG touch targets,
+ * generous padding, and high-contrast specular reflections.
  */
 @Composable
 fun MacDockGlassPill(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
     content: @Composable BoxScope.() -> Unit
 ) {
     val wallpaperSource = LocalWallpaperContainer.current
@@ -208,10 +211,10 @@ fun MacDockGlassPill(
     Box(
         modifier = modifier
             .shadow(
-                elevation = 12.dp,
+                elevation = 14.dp,
                 shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.50f),
-                spotColor = Color.Black.copy(alpha = 0.35f)
+                ambientColor = Color.Black.copy(alpha = 0.55f),
+                spotColor = Color.Black.copy(alpha = 0.40f)
             )
             .clip(shape)
     ) {
@@ -251,7 +254,7 @@ fun MacDockGlassPill(
                     .background(
                         Brush.verticalGradient(
                             listOf(
-                                Color.White.copy(alpha = 0.16f),
+                                Color.White.copy(alpha = 0.18f),
                                 Color.White.copy(alpha = 0.08f)
                             )
                         )
@@ -280,7 +283,13 @@ fun MacDockGlassPill(
                 )
         )
 
-        content()
+        // Apple HIG Inner Padding & Content Alignment
+        Box(
+            modifier = Modifier.padding(contentPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            content()
+        }
     }
 }
 

@@ -143,23 +143,23 @@
     /* AUTHENTIC BOTTOM HORIZONTAL macOS DOCK SHELF */
     .macos-dock-shelf-horizontal {
       position: relative;
-      height: 82px;
+      height: 96px;
       width: 100%;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.20) 0%, rgba(255, 255, 255, 0.08) 100%);
-      backdrop-filter: blur(24px) saturate(190%);
-      -webkit-backdrop-filter: blur(24px) saturate(190%);
-      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border-radius: 28px;
       border: 1.25px solid rgba(255, 255, 255, 0.25);
       border-top-color: rgba(255, 255, 255, 0.85);
       border-bottom-color: rgba(255, 255, 255, 0.10);
       box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.65),
-        inset 0 1px 1px 0 rgba(255, 255, 255, 0.75),
+        0 24px 44px rgba(0, 0, 0, 0.65),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.80),
         inset 0 -1px 1px 0 rgba(255, 255, 255, 0.10);
       display: flex;
       align-items: center;
       justify-content: space-evenly;
-      padding: 0 8px;
+      padding: 0 10px;
       overflow: hidden;
     }
 
@@ -168,51 +168,52 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 48px;
+      width: 52px;
       cursor: pointer;
       transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .dock-app-slot:hover {
-      transform: translateY(-4px) scale(1.08);
+      transform: translateY(-6px) scale(1.18);
     }
     .dock-app-squircle {
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.12) 100%);
+      width: 48px;
+      height: 48px;
+      border-radius: 12.5px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.15) 100%);
       border: 1px solid rgba(255, 255, 255, 0.65);
       border-top-color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.05rem;
+      font-size: 1.45rem;
       font-weight: 600;
       color: #fff;
       text-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.8);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
     }
     .dock-app-squircle.empty {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px dashed rgba(255, 255, 255, 0.35);
-      color: rgba(255, 255, 255, 0.45);
-      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(255, 255, 255, 0.40);
+      color: rgba(255, 255, 255, 0.50);
+      font-size: 1.1rem;
     }
     .dock-app-label {
-      font-size: 0.62rem;
+      font-size: 0.68rem;
+      font-weight: 500;
       color: #ffffff;
       margin-top: 4px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 48px;
+      max-width: 52px;
       text-align: center;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
     }
     .dock-app-pip {
-      width: 3px;
-      height: 3px;
+      width: 3.5px;
+      height: 3.5px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       margin-top: 2px;
     }
 

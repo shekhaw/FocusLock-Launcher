@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
 import com.dumbphone.launcher.data.ScreenState
+import com.dumbphone.launcher.ui.components.AppIconImage
 import com.dumbphone.launcher.ui.components.ControlCenterSheet
 import com.dumbphone.launcher.ui.components.GlassTextShadow
 import com.dumbphone.launcher.ui.components.MacDockGlassCard
@@ -86,38 +88,48 @@ fun HomeScreen(
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top Status & Control Center Launcher Bar
+            // Top Status & Control Center Launcher Bar (Apple iOS / macOS Dynamic Island Style)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
+                    .padding(horizontal = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "FocusLock Liquid",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.50f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White.copy(alpha = 0.65f),
                     style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                 )
 
                 MacDockGlassPill(
-                    modifier = Modifier
-                        .clickable { viewModel.openControlCenter() }
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                    modifier = Modifier.clickable { viewModel.openControlCenter() },
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text(
-                        text = "⌘ Control",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        style = Typography.labelSmall.copy(shadow = GlassTextShadow)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = "Control Center",
+                            tint = Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = "Control",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                        )
+                    }
                 }
             }
 
-            // 1. Floating Clock, Date & Cycleable Liquid Glass Widget
+            // 1. Floating Clock, Date & Tactile Apple-grade Desktop Widget
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -135,19 +147,19 @@ fun HomeScreen(
                     style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
                     color = Color.White.copy(alpha = 0.90f)
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Interactive Cycleable Liquid Glass Desktop Widget
+                // Interactive Apple-grade Tactile Liquid Glass Desktop Widget
                 MacDockGlassPill(
-                    modifier = Modifier
-                        .clickable { viewModel.cycleDesktopWidget() }
-                        .padding(horizontal = 16.dp, vertical = 7.dp)
+                    modifier = Modifier.clickable { viewModel.cycleDesktopWidget() },
+                    contentPadding = PaddingValues(horizontal = 22.dp, vertical = 11.dp)
                 ) {
                     when (desktopWidgetType) {
                         0 -> {
                             Text(
                                 text = "☀️ 24°C • Mostly Sunny • H:27° L:16°",
-                                fontSize = 11.5.sp,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.SemiBold,
                                 color = Color.White,
                                 style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                             )
@@ -155,7 +167,8 @@ fun HomeScreen(
                         1 -> {
                             Text(
                                 text = "⚡ Battery 85% • 4.2 GB RAM Free",
-                                fontSize = 11.5.sp,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.SemiBold,
                                 color = Color.White,
                                 style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                             )
@@ -163,7 +176,8 @@ fun HomeScreen(
                         else -> {
                             Text(
                                 text = "🌱 42m Focus Today • 3 Mindful Unlocks",
-                                fontSize = 11.5.sp,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.SemiBold,
                                 color = Color.White,
                                 style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                             )
@@ -171,11 +185,11 @@ fun HomeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "“Simplicity is the ultimate sophistication.”",
                     style = Typography.labelSmall.copy(shadow = GlassTextShadow),
-                    color = Color.White.copy(alpha = 0.60f)
+                    color = Color.White.copy(alpha = 0.65f)
                 )
             }
 
@@ -184,11 +198,10 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Access Other Apps (Floating macOS Capsule Pill directly above dock)
+                // Access All Apps (Apple-grade Action Capsule)
                 MacDockGlassPill(
-                    modifier = Modifier
-                        .clickable { viewModel.openFrictionGate() }
-                        .padding(horizontal = 20.dp, vertical = 9.dp)
+                    modifier = Modifier.clickable { viewModel.openFrictionGate() },
+                    contentPadding = PaddingValues(horizontal = 26.dp, vertical = 12.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -198,20 +211,20 @@ fun HomeScreen(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Lock",
                             tint = Color.White.copy(alpha = 0.95f),
-                            modifier = Modifier.size(13.dp)
+                            modifier = Modifier.size(15.dp)
                         )
-                        Spacer(modifier = Modifier.width(7.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Access Other Apps",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
+                            text = "Access All Apps",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
                             color = Color.White,
                             style = Typography.bodyMedium.copy(shadow = GlassTextShadow)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Authentic macOS Horizontal Dock Shelf with Wave Magnification
                 MacDockHorizontalShelf(
@@ -249,7 +262,7 @@ fun MacDockHorizontalShelf(
     MacDockGlassCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(86.dp)
+            .height(98.dp)
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset -> touchX = offset.x },
@@ -261,15 +274,15 @@ fun MacDockHorizontalShelf(
                     onDragCancel = { touchX = null }
                 )
             },
-        cornerRadius = 26.dp,
-        refractionHeight = 20.dp,
+        cornerRadius = 28.dp,
+        refractionHeight = 22.dp,
         refractionOffset = 70.dp,
         dispersion = 0.55f
     ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 6.dp)
+                .padding(horizontal = 8.dp)
         ) {
             val totalWidthPx = constraints.maxWidth.toFloat()
             val slotWidthPx = totalWidthPx / totalSlots
@@ -288,7 +301,7 @@ fun MacDockHorizontalShelf(
                         val maxDistance = slotWidthPx * 1.5f
                         if (distance < maxDistance) {
                             val factor = (maxDistance - distance) / maxDistance
-                            1.0f + 0.36f * factor
+                            1.0f + 0.35f * factor
                         } else 1.0f
                     } else 1.0f
 
@@ -302,7 +315,7 @@ fun MacDockHorizontalShelf(
                     )
 
                     val animatedOffsetY by animateDpAsState(
-                        targetValue = if (animatedScale > 1.05f) (-(animatedScale - 1f) * 36f).dp else 0.dp,
+                        targetValue = if (animatedScale > 1.03f) (-(animatedScale - 1f) * 40f).dp else 0.dp,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
                             stiffness = Spring.StiffnessLow
@@ -323,7 +336,9 @@ fun MacDockHorizontalShelf(
 }
 
 /**
- * Single App Slot inside the macOS Horizontal Dock Shelf
+ * Authentic Apple iOS / macOS Squircle App Slot inside the Horizontal Dock Shelf:
+ * Renders the real, vibrant high-res native Android app icon inside an Apple continuous
+ * curvature squircle tile with specular rim, label, and active running indicator dot.
  */
 @Composable
 fun MacDockAppSlot(
@@ -336,7 +351,7 @@ fun MacDockAppSlot(
 
     Column(
         modifier = Modifier
-            .width(50.dp)
+            .width(54.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -347,67 +362,57 @@ fun MacDockAppSlot(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // App Squircle Icon
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(RoundedCornerShape(11.dp))
-                .background(
-                    if (isAssigned) {
-                        Brush.linearGradient(
+        if (isAssigned && app != null) {
+            // Real Native Application Icon (Apple HIG 50dp Squircle)
+            AppIconImage(
+                drawable = app.icon,
+                label = app.label,
+                modifier = Modifier.size(50.dp),
+                cornerRadius = 12.5.dp
+            )
+        } else {
+            // Unassigned Slot: Apple Frosted Glass Tile with Add Glyph
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(12.5.dp))
+                    .background(
+                        Brush.verticalGradient(
                             listOf(
-                                Color.White.copy(alpha = 0.28f),
-                                Color.White.copy(alpha = 0.12f)
+                                Color.White.copy(alpha = 0.16f),
+                                Color.White.copy(alpha = 0.05f)
                             )
                         )
-                    } else {
-                        Brush.linearGradient(
+                    )
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
                             listOf(
-                                Color.White.copy(alpha = 0.08f),
-                                Color.White.copy(alpha = 0.03f)
+                                Color.White.copy(alpha = 0.40f),
+                                Color.White.copy(alpha = 0.10f)
                             )
-                        )
-                    }
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        listOf(
-                            if (isAssigned) Color.White.copy(alpha = 0.70f) else Color.White.copy(alpha = 0.25f),
-                            if (isAssigned) Color.White.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.08f)
-                        )
+                        ),
+                        shape = RoundedCornerShape(12.5.dp)
                     ),
-                    shape = RoundedCornerShape(11.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (app != null) {
-                val initial = if (app.label.isNotBlank()) app.label.take(1).uppercase() else "•"
-                Text(
-                    text = initial,
-                    color = Color.White,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    style = Typography.titleMedium.copy(shadow = GlassTextShadow)
-                )
-            } else {
+                contentAlignment = Alignment.Center
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Slot",
-                    tint = Color.White.copy(alpha = 0.45f),
-                    modifier = Modifier.size(16.dp)
+                    contentDescription = "Add App",
+                    tint = Color.White.copy(alpha = 0.55f),
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(3.dp))
 
-        // Label below squircle
+        // Label below squircle with high-contrast glass shadow
         Text(
             text = app?.label ?: "Add",
-            fontSize = 10.sp,
+            fontSize = 10.5.sp,
             color = if (isAssigned) Color.White else Color.White.copy(alpha = 0.50f),
-            fontWeight = FontWeight.Normal,
+            fontWeight = if (isAssigned) FontWeight.Medium else FontWeight.Normal,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
@@ -415,17 +420,17 @@ fun MacDockAppSlot(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // 3D Glass Pip indicator dot under assigned app
+        // Apple macOS Running Dot Indicator under assigned app
         if (isAssigned) {
             Spacer(modifier = Modifier.height(2.dp))
             Box(
                 modifier = Modifier
-                    .size(3.dp)
+                    .size(3.5.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(Color.White.copy(alpha = 0.90f))
+                    .background(Color.White.copy(alpha = 0.95f))
             )
         } else {
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(5.5.dp))
         }
     }
 }

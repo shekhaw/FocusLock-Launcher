@@ -99,24 +99,24 @@ fun ControlCenterSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             MacDockGlassPill(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Text(
                                     text = "🔋 85%",
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = Color.White,
                                     style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                                 )
                             }
 
                             MacDockGlassPill(
-                                modifier = Modifier
-                                    .clickable { viewModel.closeControlCenter() }
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                                modifier = Modifier.clickable { viewModel.closeControlCenter() },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Text(
                                     text = "✕",
-                                    fontSize = 12.sp,
+                                    fontSize = 13.sp,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
                                     style = Typography.labelSmall.copy(shadow = GlassTextShadow)
@@ -256,14 +256,13 @@ fun ControlCenterSheet(
                             }
 
                             MacDockGlassPill(
-                                modifier = Modifier
-                                    .clickable { viewModel.toggleMusic() }
-                                    .padding(horizontal = 14.dp, vertical = 7.dp)
+                                modifier = Modifier.clickable { viewModel.toggleMusic() },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                             ) {
                                 Text(
                                     text = if (isMusicPlaying) "⏸ Pause" else "▶ Play",
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 12.5.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = Color.White,
                                     style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                                 )
@@ -286,9 +285,8 @@ fun ControlCenterTogglePill(
     modifier: Modifier = Modifier
 ) {
     MacDockGlassPill(
-        modifier = modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 9.dp)
+        modifier = modifier.clickable(onClick = onClick),
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 11.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -297,33 +295,33 @@ fun ControlCenterTogglePill(
         ) {
             Box(
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(34.dp)
                     .clip(RoundedCornerShape(50))
                     .background(
-                        if (isActive) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f)
+                        if (isActive) Color.White.copy(alpha = 0.38f) else Color.White.copy(alpha = 0.10f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = label,
-                    tint = if (isActive) Color.White else Color.White.copy(alpha = 0.5f),
-                    modifier = Modifier.size(16.dp)
+                    tint = if (isActive) Color.White else Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.size(18.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(9.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
                     text = label,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color.White,
                     style = Typography.bodyMedium.copy(shadow = GlassTextShadow)
                 )
                 Text(
                     text = subtitle,
-                    fontSize = 10.sp,
-                    color = if (isActive) Color(0xFF4ADE80) else Color.White.copy(alpha = 0.45f),
+                    fontSize = 11.sp,
+                    color = if (isActive) Color(0xFF4ADE80) else Color.White.copy(alpha = 0.50f),
                     style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                 )
             }

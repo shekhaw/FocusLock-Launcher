@@ -170,67 +170,100 @@ fun FrictionGateScreen(
                         }
                     }
                 } else {
-                    // PIN PASSCODE GATE
+                    // PIN PASSCODE GATE (Apple iOS Style Dialpad)
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // PIN Dots
+                        // Apple PIN Indicator Dots
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.padding(bottom = 24.dp)
+                            horizontalArrangement = Arrangement.spacedBy(18.dp),
+                            modifier = Modifier.padding(bottom = 26.dp)
                         ) {
                             for (i in 0 until 4) {
                                 val isFilled = i < enteredPin.length
                                 Box(
                                     modifier = Modifier
-                                        .size(16.dp)
+                                        .size(15.dp)
                                         .clip(CircleShape)
                                         .background(
-                                            if (isFilled) Color.White else Color.White.copy(alpha = 0.25f)
+                                            if (isFilled) Color.White else Color.White.copy(alpha = 0.20f)
                                         )
-                                        .border(1.dp, Color.White.copy(alpha = 0.5f), CircleShape)
+                                        .border(1.2.dp, Color.White.copy(alpha = if (isFilled) 0.95f else 0.45f), CircleShape)
                                 )
                             }
                         }
 
-                        // Glass Keypad
-                        val keys = listOf(
-                            listOf('1', '2', '3'),
-                            listOf('4', '5', '6'),
-                            listOf('7', '8', '9'),
-                            listOf('C', '0', '⌫')
+                        // Apple iOS-grade Liquid Glass Keypad
+                        val keypadGrid = listOf(
+                            listOf("1" to "", "2" to "A B C", "3" to "D E F"),
+                            listOf("4" to "G H I", "5" to "J K L", "6" to "M N O"),
+                            listOf("7" to "P Q R S", "8" to "T U V", "9" to "W X Y Z"),
+                            listOf("C" to "CLEAR", "0" to "+", "⌫" to "DELETE")
                         )
 
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            keys.forEach { row ->
+                            keypadGrid.forEach { row ->
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(18.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(22.dp)
                                 ) {
-                                    row.forEach { key ->
+                                    row.forEach { (key, subLabel) ->
                                         Box(
                                             modifier = Modifier
-                                                .size(58.dp)
+                                                .size(70.dp)
                                                 .clip(CircleShape)
-                                                .background(Color.White.copy(alpha = 0.14f))
-                                                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
+                                                .background(
+                                                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                                                        listOf(
+                                                            Color.White.copy(alpha = 0.22f),
+                                                            Color.White.copy(alpha = 0.08f)
+                                                        )
+                                                    )
+                                                )
+                                                .border(
+                                                    width = 1.2.dp,
+                                                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                                                        listOf(
+                                                            Color.White.copy(alpha = 0.60f),
+                                                            Color.White.copy(alpha = 0.15f)
+                                                        )
+                                                    ),
+                                                    shape = CircleShape
+                                                )
                                                 .clickable {
                                                     when (key) {
-                                                        'C' -> viewModel.clearPin()
-                                                        '⌫' -> viewModel.backspacePin()
-                                                        else -> viewModel.onPinDigit(key)
+                                                        "C" -> viewModel.clearPin()
+                                                        "⌫" -> viewModel.backspacePin()
+                                                        else -> viewModel.onPinDigit(key[0])
                                                     }
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Text(
-                                                text = key.toString(),
-                                                style = Typography.titleLarge.copy(shadow = GlassTextShadow),
-                                                color = Color.White
-                                            )
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = key,
+                                                    fontSize = if (key.length == 1 && key[0].isDigit()) 27.sp else 20.sp,
+                                                    fontWeight = FontWeight.Normal,
+                                                    color = Color.White,
+                                                    style = Typography.titleLarge.copy(shadow = GlassTextShadow)
+                                                )
+                                                if (subLabel.isNotBlank()) {
+                                                    Text(
+                                                        text = subLabel,
+                                                        fontSize = 8.5.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        letterSpacing = 1.sp,
+                                                        color = Color.White.copy(alpha = 0.70f),
+                                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }

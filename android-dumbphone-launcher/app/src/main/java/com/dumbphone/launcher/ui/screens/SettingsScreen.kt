@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
 import com.dumbphone.launcher.data.ScreenState
 import com.dumbphone.launcher.data.UnlockGateType
+import com.dumbphone.launcher.ui.components.AppIconImage
 import com.dumbphone.launcher.ui.components.GlassTextShadow
 import com.dumbphone.launcher.ui.components.MacDockGlassCard
 import com.dumbphone.launcher.ui.components.MacDockGlassDivider
@@ -88,15 +89,14 @@ fun SettingsScreen(
                 )
 
                 MacDockGlassPill(
-                    modifier = Modifier
-                        .clickable { viewModel.navigateTo(ScreenState.HOME) }
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                    modifier = Modifier.clickable { viewModel.navigateTo(ScreenState.HOME) },
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = "Done ✓",
                         color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.SemiBold,
                         style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                     )
                 }
@@ -146,15 +146,14 @@ fun SettingsScreen(
                                 }
                                 Spacer(modifier = Modifier.width(10.dp))
                                 MacDockGlassPill(
-                                    modifier = Modifier
-                                        .clickable { photoPickerLauncher.launch("image/*") }
-                                        .padding(horizontal = 14.dp, vertical = 7.dp)
+                                    modifier = Modifier.clickable { photoPickerLauncher.launch("image/*") },
+                                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                                 ) {
                                     Text(
                                         text = "Choose Photo 📷",
-                                        fontSize = 12.sp,
+                                        fontSize = 13.sp,
                                         color = Color.White,
-                                        fontWeight = FontWeight.Medium,
+                                        fontWeight = FontWeight.SemiBold,
                                         style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                                     )
                                 }
@@ -164,14 +163,14 @@ fun SettingsScreen(
                                 MacDockGlassPill(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable { viewModel.clearCustomWallpaper() }
-                                        .padding(vertical = 10.dp)
+                                        .clickable { viewModel.clearCustomWallpaper() },
+                                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 11.dp)
                                 ) {
                                     Text(
                                         text = "Remove Photo & Use Fluid Wallpaper",
-                                        fontSize = 13.sp,
+                                        fontSize = 13.5.sp,
                                         color = Color(0xFFFCA5A5),
-                                        fontWeight = FontWeight.Medium,
+                                        fontWeight = FontWeight.SemiBold,
                                         style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
                                         modifier = Modifier.align(Alignment.Center)
                                     )
@@ -303,7 +302,7 @@ fun SettingsScreen(
 
                             MacDockGlassDivider(paddingHorizontal = 0.dp)
 
-                            // 3. Glass Tint Tone Presets
+                            // 3. Glass Tint Tone Presets (Apple Segmented Chip Layout)
                             Text(
                                 text = "GLASS TINT TONES",
                                 fontSize = 11.sp,
@@ -312,31 +311,62 @@ fun SettingsScreen(
                                 style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                             )
 
+                            val tonesRow1 = listOf(
+                                Triple("CLEAR", "💎 Clear", 0.0f),
+                                Triple("SMOKE", "🌑 Smoke", 0.12f)
+                            )
+                            val tonesRow2 = listOf(
+                                Triple("ICE", "❄️ Ice", 0.12f),
+                                Triple("ROSE", "🌸 Rose", 0.12f),
+                                Triple("EMERALD", "🌲 Jade", 0.12f)
+                            )
+
+                            // Row 1 (2 spacious pills)
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                listOf(
-                                    Triple("CLEAR", "💎 Clear", 0.0f),
-                                    Triple("SMOKE", "🌑 Smoke", 0.12f),
-                                    Triple("ICE", "❄️ Ice", 0.12f),
-                                    Triple("ROSE", "🌸 Rose", 0.12f),
-                                    Triple("EMERALD", "🌲 Jade", 0.12f)
-                                ).forEach { (toneKey, label, alpha) ->
+                                tonesRow1.forEach { (toneKey, label, alpha) ->
                                     val isSelected = (tintTone == toneKey)
                                     MacDockGlassPill(
                                         modifier = Modifier
                                             .weight(1f)
-                                            .clickable { viewModel.setGlassTintTone(toneKey, alpha) }
-                                            .padding(vertical = 7.dp)
+                                            .clickable { viewModel.setGlassTintTone(toneKey, alpha) },
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 9.dp)
                                     ) {
                                         Text(
                                             text = label,
-                                            fontSize = 9.5.sp,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f),
+                                            fontSize = 13.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.70f),
                                             textAlign = TextAlign.Center,
-                                            style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                            style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Row 2 (3 spacious pills)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                tonesRow2.forEach { (toneKey, label, alpha) ->
+                                    val isSelected = (tintTone == toneKey)
+                                    MacDockGlassPill(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { viewModel.setGlassTintTone(toneKey, alpha) },
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 9.dp)
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            fontSize = 13.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.70f),
+                                            textAlign = TextAlign.Center,
+                                            style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }
@@ -345,18 +375,18 @@ fun SettingsScreen(
 
                             MacDockGlassDivider(paddingHorizontal = 0.dp)
 
-                            // 4. Reset Button
+                            // 4. Reset Button (Apple Capsule)
                             MacDockGlassPill(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { viewModel.resetGlassToDefault() }
-                                    .padding(vertical = 9.dp)
+                                    .clickable { viewModel.resetGlassToDefault() },
+                                contentPadding = PaddingValues(horizontal = 22.dp, vertical = 12.dp)
                             ) {
                                 Text(
                                     text = "Reset Glass to Factory Default ↺",
-                                    fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 13.5.sp,
+                                    color = Color.White.copy(alpha = 0.90f),
+                                    fontWeight = FontWeight.SemiBold,
                                     style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
                                     modifier = Modifier.align(Alignment.Center)
                                 )
@@ -390,19 +420,32 @@ fun SettingsScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable { activeSlotToAssign = i }
-                                        .padding(vertical = 6.dp),
+                                        .padding(vertical = 4.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = "Slot ${i + 1}: ${app?.label ?: "(Empty Slot)"}",
-                                        style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
-                                        color = if (app != null) Color.White else Color.White.copy(alpha = 0.45f)
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        if (app != null) {
+                                            AppIconImage(
+                                                drawable = app.icon,
+                                                label = app.label,
+                                                modifier = Modifier.size(34.dp),
+                                                cornerRadius = 8.5.dp
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                        }
+                                        Text(
+                                            text = "Slot ${i + 1}: ${app?.label ?: "(Empty Slot)"}",
+                                            style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                            color = if (app != null) Color.White else Color.White.copy(alpha = 0.45f),
+                                            fontWeight = if (app != null) FontWeight.Medium else FontWeight.Normal
+                                        )
+                                    }
                                     Text(
                                         text = "Change ✎",
                                         style = Typography.labelSmall.copy(shadow = GlassTextShadow),
-                                        color = Color.White.copy(alpha = 0.85f)
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                                 if (i < 5) {
@@ -580,18 +623,30 @@ fun SettingsScreen(
                         }
                         items(allApps.size) { index ->
                             val item = allApps[index]
-                            Text(
-                                text = item.label,
-                                style = Typography.bodyMedium,
-                                color = Color.White,
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
                                         viewModel.updateHomeSlot(slotIndex, item.packageName)
                                         activeSlotToAssign = null
                                     }
-                                    .padding(vertical = 8.dp)
-                            )
+                                    .padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                AppIconImage(
+                                    drawable = item.icon,
+                                    label = item.label,
+                                    modifier = Modifier.size(36.dp),
+                                    cornerRadius = 9.dp
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = item.label,
+                                    style = Typography.bodyMedium,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
                 },

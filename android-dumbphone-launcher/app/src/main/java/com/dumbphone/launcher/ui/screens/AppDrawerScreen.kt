@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.ScreenState
+import com.dumbphone.launcher.ui.components.AppIconImage
 import com.dumbphone.launcher.ui.components.GlassTextShadow
 import com.dumbphone.launcher.ui.components.MacDockGlassCard
 import com.dumbphone.launcher.ui.components.MacDockGlassDivider
@@ -87,46 +88,44 @@ fun AppDrawerScreen(
                     }
 
                     MacDockGlassPill(
-                        modifier = Modifier
-                            .clickable { viewModel.navigateTo(ScreenState.HOME) }
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                        modifier = Modifier.clickable { viewModel.navigateTo(ScreenState.HOME) },
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Text(
                             text = "Relock 🔒",
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             color = Color.White,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             style = Typography.labelSmall.copy(shadow = GlassTextShadow)
                         )
                     }
                 }
             }
 
-            // 2. Search Bar (macOS Glass Capsule Pill)
+            // 2. Search Bar (Apple Glass Capsule Pill)
             MacDockGlassPill(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
                         tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         placeholder = {
                             Text(
                                 "Search installed apps...",
-                                color = Color.White.copy(alpha = 0.45f),
-                                fontSize = 14.sp
+                                color = Color.White.copy(alpha = 0.50f),
+                                fontSize = 14.5.sp
                             )
                         },
                         colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -159,40 +158,43 @@ fun AppDrawerScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { viewModel.launchApp(app.packageName) }
-                                .padding(horizontal = 18.dp, vertical = 11.dp),
+                                .padding(horizontal = 18.dp, vertical = 10.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(RoundedCornerShape(9.dp))
-                                        .background(Color.White.copy(alpha = 0.15f))
-                                        .border(0.75.dp, Color.White.copy(alpha = 0.40f), RoundedCornerShape(9.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
+                                // Authentic Native Android Application Icon (Apple Squircle)
+                                AppIconImage(
+                                    drawable = app.icon,
+                                    label = app.label,
+                                    modifier = Modifier.size(46.dp),
+                                    cornerRadius = 11.5.dp
+                                )
+
+                                Spacer(modifier = Modifier.width(14.dp))
+                                Column {
                                     Text(
-                                        text = app.label.take(1).uppercase(),
+                                        text = app.label,
+                                        style = Typography.bodyLarge.copy(shadow = GlassTextShadow),
                                         color = Color.White,
-                                        fontSize = 15.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        style = Typography.titleSmall.copy(shadow = GlassTextShadow)
+                                        fontSize = 15.sp
+                                    )
+                                    Text(
+                                        text = app.packageName,
+                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                        color = Color.White.copy(alpha = 0.45f),
+                                        fontSize = 11.sp
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(14.dp))
-                                Text(
-                                    text = app.label,
-                                    style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Medium
-                                )
                             }
 
                             Text(
-                                text = "Launch ›",
+                                text = "Open ›",
                                 style = Typography.labelSmall.copy(shadow = GlassTextShadow),
-                                color = Color.White.copy(alpha = 0.55f)
+                                color = Color.White.copy(alpha = 0.60f),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                         MacDockGlassDivider(paddingHorizontal = 16.dp)
