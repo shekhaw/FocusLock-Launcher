@@ -1,7 +1,13 @@
 package com.dumbphone.launcher.ui.screens
 
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,8 +19,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
@@ -36,21 +46,70 @@ fun SettingsScreen(
     val currentPhrase by viewModel.customPhrase.collectAsState()
     val currentPin by viewModel.targetPin.collectAsState()
     val wallpaperTheme by viewModel.wallpaperTheme.collectAsState()
+    val hasCustomWallpaper by viewModel.hasCustomWallpaper.collectAsState()
+    val wallpaperUpdateTrigger by viewModel.wallpaperUpdateTrigger.collectAsState()
 
     var phraseText by remember(currentPhrase) { mutableStateOf(currentPhrase) }
     var pinText by remember(currentPin) { mutableStateOf(currentPin) }
 
     var activeSlotToAssign by remember { mutableStateOf<Int?>(null) }
 
+    // Photo picker launcher
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.setCustomPhotoWallpaper(uri)
+        }
+    }
+
+    // Custom wallpaper preview bitmap
+    val customWallpaperBitmap = remember(hasCustomWallpaper, wallpaperUpdateTrigger) {
+        if (hasCustomWallpaper) {
+            val file = viewModel.getCustomWallpaperFile()
+            if (file.exists() && file.length() > 0) {
+                try {
+                    BitmapFactory.decodeFile(file.absolutePath)
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+        } else null
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(wallpaperTheme.getBackgroundBrush())
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .then(
+                if (customWallpaperBitmap == null) {
+                    Modifier.background(wallpaperTheme.getBackgroundBrush())
+                } else {
+                    Modifier
+                }
+            )
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        // Background photo if set
+        if (customWallpaperBitmap != null) {
+            Image(
+                bitmap = customWallpaperBitmap.asImageBitmap(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.65f))
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+        ) {
             // Header
             Row(
                 modifier = Modifier
@@ -80,10 +139,10 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                // Section 0: Wallpaper Themes
+                // Section 0: Wallpaper & Background Customization
                 item {
                     Text(
-                        text = "LIQUID GLASS WALLPAPERS",
+                        text = "WALLPAPER & BACKGROUND",
                         style = Typography.labelSmall,
                         color = Color.White.copy(alpha = 0.6f)
                     )
@@ -92,19 +151,90 @@ fun SettingsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(GlassWhiteSubtle)
-                            .border(1.dp, GlassWhiteBorder, RoundedCornerShape(20.dp))
-                            .padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(MacDockGlassTop, MacDockGlassBottom)
+                                )
+                            )
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    Brush.verticalGradient(
+                                        listOf(MacDockBorderTop, MacDockBorderMid)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(22.dp)
+                            )
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        // Custom Photo Choice
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Custom Photo Wallpaper",
+                                    style = Typography.bodyLarge,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = if (hasCustomWallpaper) "Active: Custom Photo" else "Choose any photo from your device",
+                                    style = Typography.labelSmall,
+                                    color = if (hasCustomWallpaper) Color(0xFF4ADE80) else Color.White.copy(alpha = 0.5f)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Button(
+                                onClick = { photoPickerLauncher.launch("image/*") },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.White.copy(alpha = 0.22f),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Choose Photo")
+                            }
+                        }
+
+                        if (hasCustomWallpaper) {
+                            Button(
+                                onClick = { viewModel.clearCustomWallpaper() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0x33EF4444),
+                                    contentColor = Color(0xFFFCA5A5)
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Remove Photo & Use Fluid Wallpaper")
+                            }
+                        }
+
+                        HorizontalDivider(
+                            color = MacDockDivider,
+                            thickness = 0.8.dp,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+
+                        Text(
+                            text = "LIVING FLUID PRESETS",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.5f)
+                        )
+
                         WallpaperTheme.values().forEach { theme ->
-                            val isSelected = (theme == wallpaperTheme)
+                            val isSelected = (!hasCustomWallpaper && theme == wallpaperTheme)
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) GlassWhiteMedium else Color.Transparent)
+                                    .background(if (isSelected) Color.White.copy(alpha = 0.20f) else Color.Transparent)
                                     .clickable { viewModel.setWallpaperTheme(theme) }
                                     .padding(horizontal = 14.dp, vertical = 10.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -126,7 +256,7 @@ fun SettingsScreen(
                 // Section 1: The 6 Home Screen Apps
                 item {
                     Text(
-                        text = "HOME SCREEN APPS (UP TO 6 ONLY)",
+                        text = "HOME SCREEN APPS (UP TO 6 IN DOCK)",
                         style = Typography.labelSmall,
                         color = Color.White.copy(alpha = 0.6f)
                     )
@@ -135,10 +265,22 @@ fun SettingsScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(GlassWhiteSubtle)
-                            .border(1.dp, GlassWhiteBorder, RoundedCornerShape(20.dp))
-                            .padding(12.dp),
+                            .clip(RoundedCornerShape(22.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(MacDockGlassTop, MacDockGlassBottom)
+                                )
+                            )
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    Brush.verticalGradient(
+                                        listOf(MacDockBorderTop, MacDockBorderMid)
+                                    )
+                                ),
+                                shape = RoundedCornerShape(22.dp)
+                            )
+                            .padding(14.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         for (i in 0 until 6) {
@@ -147,7 +289,7 @@ fun SettingsScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable { activeSlotToAssign = i }
-                                    .padding(vertical = 4.dp),
+                                    .padding(vertical = 6.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {

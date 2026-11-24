@@ -1,6 +1,7 @@
 package com.dumbphone.launcher.ui.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dumbphone.launcher.data.*
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 
 class LauncherViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -44,6 +46,12 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     private val _wallpaperTheme = MutableStateFlow(WallpaperTheme.AURORA)
     val wallpaperTheme: StateFlow<WallpaperTheme> = _wallpaperTheme.asStateFlow()
 
+    private val _hasCustomWallpaper = MutableStateFlow(false)
+    val hasCustomWallpaper: StateFlow<Boolean> = _hasCustomWallpaper.asStateFlow()
+
+    private val _wallpaperUpdateTrigger = MutableStateFlow(0L)
+    val wallpaperUpdateTrigger: StateFlow<Long> = _wallpaperUpdateTrigger.asStateFlow()
+
     private val _sessionSecondsRemaining = MutableStateFlow(120)
     val sessionSecondsRemaining: StateFlow<Int> = _sessionSecondsRemaining.asStateFlow()
 
@@ -59,6 +67,8 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             _customPhrase.value = prefs.getCustomPhrase()
             _targetPin.value = prefs.getPinCode()
             _wallpaperTheme.value = prefs.getWallpaperTheme()
+            _hasCustomWallpaper.value = prefs.isCustomWallpaperEnabled()
+            _wallpaperUpdateTrigger.value = prefs.getCustomWallpaperTimestamp()
 
             val installed = repository.getInstalledApps()
             _allInstalledApps.value = installed
@@ -191,5 +201,29 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     fun setWallpaperTheme(theme: WallpaperTheme) {
         prefs.setWallpaperTheme(theme)
         _wallpaperTheme.value = theme
+        _hasCustomWallpaper.value = false
+        _wallpaperUpdateTrigger.value = System.currentTimeMillis()
+    }
+
+    fun setCustomPhotoWallpaper(uri: Uri) {
+        viewModelScope.launch {
+            val success = prefs.saveCustomWallpaperFromUri(getApplication(), uri)
+            if (success) {
+                _hasCustomWallpaper.value = true
+                _wallpaperUpdateTrigger.value = System.currentTimeMillis()
+            }
+        }
+    }
+
+    fun clearCustomWallpaper() {
+        viewModelScope.launch {
+            prefs.clearCustomWallpaper(getApplication())
+            _hasCustomWallpaper.value = false
+            _wallpaperUpdateTrigger.value = System.currentTimeMillis()
+        }
+    }
+
+    fun getCustomWallpaperFile(): File {
+        return prefs.getCustomWallpaperFile(getApplication())
     }
 }

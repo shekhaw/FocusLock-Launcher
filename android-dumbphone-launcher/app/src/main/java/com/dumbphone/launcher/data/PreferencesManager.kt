@@ -2,7 +2,10 @@ package com.dumbphone.launcher.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import com.dumbphone.launcher.ui.theme.WallpaperTheme
+import java.io.File
+import java.io.FileOutputStream
 
 class PreferencesManager(context: Context) {
 
@@ -15,6 +18,9 @@ class PreferencesManager(context: Context) {
         private const val KEY_CUSTOM_PHRASE = "key_custom_phrase"
         private const val KEY_PIN_CODE = "key_pin_code"
         private const val KEY_WALLPAPER = "key_wallpaper_theme"
+        private const val KEY_CUSTOM_WALLPAPER_ENABLED = "key_custom_wallpaper_enabled"
+        private const val KEY_CUSTOM_WALLPAPER_TIMESTAMP = "key_custom_wallpaper_timestamp"
+        private const val CUSTOM_WALLPAPER_FILENAME = "custom_wallpaper.jpg"
         private const val DEFAULT_PHRASE = "I am opening my phone for a real purpose."
         private const val DEFAULT_PIN = "1234"
     }
@@ -74,6 +80,59 @@ class PreferencesManager(context: Context) {
     }
 
     fun setWallpaperTheme(theme: WallpaperTheme) {
-        prefs.edit().putString(KEY_WALLPAPER, theme.name).apply()
+        prefs.edit()
+            .putString(KEY_WALLPAPER, theme.name)
+            .putBoolean(KEY_CUSTOM_WALLPAPER_ENABLED, false)
+            .apply()
+    }
+
+    fun isCustomWallpaperEnabled(): Boolean {
+        return prefs.getBoolean(KEY_CUSTOM_WALLPAPER_ENABLED, false)
+    }
+
+    fun setCustomWallpaperEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_CUSTOM_WALLPAPER_ENABLED, enabled).apply()
+    }
+
+    fun getCustomWallpaperTimestamp(): Long {
+        return prefs.getLong(KEY_CUSTOM_WALLPAPER_TIMESTAMP, 0L)
+    }
+
+    fun getCustomWallpaperFile(context: Context): File {
+        return File(context.filesDir, CUSTOM_WALLPAPER_FILENAME)
+    }
+
+    fun saveCustomWallpaperFromUri(context: Context, uri: Uri): Boolean {
+        return try {
+            val destFile = getCustomWallpaperFile(context)
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                FileOutputStream(destFile).use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            prefs.edit()
+                .putBoolean(KEY_CUSTOM_WALLPAPER_ENABLED, true)
+                .putLong(KEY_CUSTOM_WALLPAPER_TIMESTAMP, System.currentTimeMillis())
+                .apply()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    fun clearCustomWallpaper(context: Context) {
+        try {
+            val file = getCustomWallpaperFile(context)
+            if (file.exists()) {
+                file.delete()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        prefs.edit()
+            .putBoolean(KEY_CUSTOM_WALLPAPER_ENABLED, false)
+            .putLong(KEY_CUSTOM_WALLPAPER_TIMESTAMP, System.currentTimeMillis())
+            .apply()
     }
 }

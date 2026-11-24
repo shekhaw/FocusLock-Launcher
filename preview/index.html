@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FocusLock - Living Fluid Wallpaper Minimal Launcher</title>
+  <title>FocusLock - macOS Dock Glass & Custom Photo Minimal Launcher</title>
   <style>
     * {
       box-sizing: border-box;
@@ -28,7 +28,7 @@
     .header-banner {
       text-align: center;
       margin-bottom: 20px;
-      max-width: 500px;
+      max-width: 520px;
     }
     .header-banner h1 {
       font-size: 1.7rem;
@@ -44,7 +44,7 @@
       margin-top: 4px;
     }
 
-    /* Animated Liquid Wallpaper Orbs */
+    /* Living Fluid Wallpaper Orbs */
     @keyframes orb-float-1 {
       0% { transform: translate(0px, 0px) scale(1); }
       33% { transform: translate(35px, -45px) scale(1.2); }
@@ -112,7 +112,20 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      background: #000;
+      background-color: #030712;
+      background-size: cover;
+      background-position: center;
+      transition: background 0.4s ease;
+    }
+
+    /* Custom photo wallpaper overlay scrim for contrast */
+    .photo-scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.32);
+      pointer-events: none;
+      display: none;
+      z-index: 5;
     }
 
     .island {
@@ -128,41 +141,96 @@
       z-index: 100;
     }
 
-    .liquid-glass {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(28px) saturate(200%);
-      -webkit-backdrop-filter: blur(28px) saturate(200%);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 
-        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.4),
-        0 16px 40px rgba(0, 0, 0, 0.4);
+    /* macOS Dock Glass Shelf / Tray */
+    .macos-dock-tray {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.17) 0%, rgba(255, 255, 255, 0.08) 100%);
+      backdrop-filter: blur(36px) saturate(210%);
+      -webkit-backdrop-filter: blur(36px) saturate(210%);
+      border-radius: 28px;
+      border: 1.25px solid rgba(255, 255, 255, 0.22);
+      border-top-color: rgba(255, 255, 255, 0.55);
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+      box-shadow:
+        0 20px 48px -6px rgba(0, 0, 0, 0.65),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -1px 1px 0 rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin: 18px 0;
     }
 
-    .liquid-glass-pill {
-      background: rgba(255, 255, 255, 0.07);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.3);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      border-radius: 20px;
+    .macos-dock-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 20px;
       cursor: pointer;
+      transition: background 0.18s ease, transform 0.18s ease;
+      position: relative;
     }
 
-    .liquid-glass-pill:hover {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
+    .macos-dock-row:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .macos-dock-row:active {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .macos-dock-divider {
+      height: 0.8px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 0 16px;
+    }
+
+    .dock-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+    }
+
+    .dock-dot.empty {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+    }
+
+    .app-slot-name {
+      font-size: 1.02rem;
+      font-weight: 500;
+      color: #ffffff;
+      letter-spacing: 0.15px;
+    }
+    .app-slot-arrow {
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 1.1rem;
+      font-weight: 300;
+    }
+
+    .macos-pill-btn {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-top-color: rgba(255, 255, 255, 0.50);
       box-shadow: 
-        inset 0 1px 2px 0 rgba(255, 255, 255, 0.5),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.4),
         0 8px 24px rgba(0, 0, 0, 0.35);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .macos-pill-btn:hover {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.14) 100%);
+      border-top-color: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
     }
 
     .screen {
       flex: 1;
       display: none;
       flex-direction: column;
-      padding: 40px 24px 28px 24px;
+      padding: 40px 22px 28px 22px;
       overflow-y: auto;
       position: relative;
       z-index: 10;
@@ -174,7 +242,7 @@
     .floating-clock {
       padding: 10px 0;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 8px;
     }
     .clock-time {
       font-size: 4.4rem;
@@ -186,39 +254,16 @@
     }
     .clock-date {
       font-size: 0.95rem;
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.85);
       margin-top: 8px;
       font-weight: 400;
       text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
     .focus-quote {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.5);
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.55);
       font-style: italic;
-    }
-
-    .apps-slot-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 24px 0;
-    }
-    .app-slot-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 18px;
-    }
-    .app-slot-name {
-      font-size: 1.05rem;
-      font-weight: 500;
-      color: #ffffff;
-      letter-spacing: 0.2px;
-    }
-    .app-slot-arrow {
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.95rem;
     }
 
     .home-bottom {
@@ -250,10 +295,10 @@
       margin-top: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px 18px;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 10px 20px;
       border-radius: 30px;
       backdrop-filter: blur(20px);
     }
@@ -269,13 +314,29 @@
       transform: scale(1.2);
       border-color: #ffffff;
     }
+    .btn-upload-bg {
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-upload-bg:hover {
+      background: rgba(255, 255, 255, 0.24);
+    }
   </style>
 </head>
 <body>
 
   <div class="header-banner">
-    <h1>FocusLock Living Fluid Wallpaper</h1>
-    <p>Organic Fluid Motion • Zero Black Bars • Apple Liquid Glass</p>
+    <h1>FocusLock Minimal Launcher</h1>
+    <p>macOS Dock Glass Shelf • Custom Photo Wallpaper • Zero Letterbox</p>
   </div>
 
   <div class="phone-container" id="phone-chassis">
@@ -284,31 +345,39 @@
     <div id="living-orb-2" class="living-orb-2" style="background: rgba(5, 150, 105, 0.65);"></div>
     <div id="living-orb-3" class="living-orb-3" style="background: rgba(30, 27, 75, 0.55);"></div>
 
+    <!-- Scrim for custom wallpaper -->
+    <div id="photo-scrim" class="photo-scrim"></div>
+
     <div class="island"></div>
 
+    <!-- 1. HOME SCREEN -->
     <div id="screen-home" class="screen active" onmousedown="startLongPress()" onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()">
+      <!-- Floating Clock on wallpaper -->
       <div class="floating-clock">
         <div class="clock-time" id="home-clock">16:35</div>
         <div class="clock-date" id="home-date">Saturday, November 21</div>
         <div class="focus-quote">“Simplicity is the ultimate sophistication.”</div>
       </div>
 
-      <div class="apps-slot-container" id="home-apps-list"></div>
+      <!-- macOS Dock Glass Shelf -->
+      <div class="macos-dock-tray" id="macos-dock-container"></div>
 
+      <!-- Bottom Actions -->
       <div class="home-bottom">
-        <button class="liquid-glass-pill btn-vault" onclick="event.stopPropagation(); openGate()">
+        <button class="macos-pill-btn btn-vault" onclick="event.stopPropagation(); openGate()">
           <span>🔒</span>
           <span>Access Other Apps</span>
         </button>
-        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px;">
+        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 2px;">
           💡 Long-press empty screen area for Settings
         </div>
         <div class="home-indicator"></div>
       </div>
     </div>
 
+    <!-- 2. FRICTION GATE SCREEN -->
     <div id="screen-gate" class="screen" style="justify-content: center;">
-      <div class="liquid-glass" style="padding: 26px; border-radius: 28px; text-align: center;">
+      <div class="macos-dock-tray" style="padding: 26px; border-radius: 28px; text-align: center; margin: 0;">
         <div style="font-size: 2.2rem; margin-bottom: 8px;">🛡️</div>
         <div style="font-size: 1.25rem; font-weight: 600; color: #fff;">Is this important?</div>
         <div style="font-size: 0.82rem; color: rgba(255,255,255,0.65); margin-top: 4px; margin-bottom: 20px;">
@@ -319,11 +388,11 @@
           <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
             Type this phrase to unlock:
           </div>
-          <div class="liquid-glass-pill" style="padding: 12px; font-size: 0.86rem; font-style: italic; color: #fff; margin-bottom: 12px; border-left: 3px solid #fff;" id="gate-phrase-target">
+          <div class="macos-pill-btn" style="padding: 12px; font-size: 0.86rem; font-style: italic; color: #fff; margin-bottom: 12px; border-left: 3px solid #fff;" id="gate-phrase-target">
             "I am opening my phone for a real purpose."
           </div>
-          <input type="text" id="phrase-input-field" class="liquid-glass-pill" placeholder="Type exact phrase above..." oninput="checkPhraseMatch()" style="width: 100%; padding: 12px; font-size: 0.86rem; color: #fff; outline: none; margin-bottom: 14px;">
-          <button id="btn-phrase-unlock" class="liquid-glass-pill" style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 600; background: #fff; color: #000; border: none;" disabled onclick="unlockDrawer()">
+          <input type="text" id="phrase-input-field" class="macos-pill-btn" placeholder="Type exact phrase above..." oninput="checkPhraseMatch()" style="width: 100%; padding: 12px; font-size: 0.86rem; color: #fff; outline: none; margin-bottom: 14px;">
+          <button id="btn-phrase-unlock" class="macos-pill-btn" style="width: 100%; padding: 12px; font-size: 0.9rem; font-weight: 600; background: #fff; color: #000; border: none;" disabled onclick="unlockDrawer()">
             Unlock All Apps
           </button>
         </div>
@@ -334,46 +403,67 @@
       </div>
     </div>
 
+    <!-- 3. ALL APPS DRAWER -->
     <div id="screen-drawer" class="screen">
-      <div class="liquid-glass" style="padding: 14px 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <div class="macos-dock-tray" style="padding: 14px 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; margin-top: 0;">
         <div>
           <div style="font-size: 1rem; font-weight: 600; color: #fff;">All Applications</div>
           <div id="session-countdown" style="font-size: 0.74rem; color: #fde047;">Unlocked (1m 58s left)</div>
         </div>
-        <button class="liquid-glass-pill" onclick="goHome()" style="padding: 6px 14px; font-size: 0.75rem; color: #fff;">Relock 🔒</button>
+        <button class="macos-pill-btn" onclick="goHome()" style="padding: 6px 14px; font-size: 0.75rem; color: #fff;">Relock 🔒</button>
       </div>
 
-      <input type="text" id="drawer-search" class="liquid-glass-pill" placeholder="Search installed apps..." oninput="filterDrawerApps()" style="width: 100%; padding: 10px 14px; color: #fff; outline: none; margin-bottom: 14px; font-size: 0.85rem;">
+      <input type="text" id="drawer-search" class="macos-pill-btn" placeholder="Search installed apps..." oninput="filterDrawerApps()" style="width: 100%; padding: 10px 14px; color: #fff; outline: none; margin-bottom: 14px; font-size: 0.85rem;">
 
       <div id="drawer-apps-list" style="display: flex; flex-direction: column; gap: 8px; overflow-y: auto;"></div>
     </div>
 
+    <!-- 4. SETTINGS SCREEN -->
     <div id="screen-settings" class="screen">
-      <div class="liquid-glass" style="padding: 14px 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <div class="macos-dock-tray" style="padding: 14px 18px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; margin-top: 0;">
         <div style="font-size: 1rem; font-weight: 600; color: #fff;">Launcher Settings</div>
-        <button class="liquid-glass-pill" onclick="goHome()" style="padding: 6px 14px; font-size: 0.75rem; color: #fff;">Done</button>
+        <button class="macos-pill-btn" onclick="goHome()" style="padding: 6px 14px; font-size: 0.75rem; color: #fff;">Done</button>
       </div>
 
-      <div class="liquid-glass" style="padding: 16px; border-radius: 20px; margin-bottom: 14px;">
+      <!-- Wallpaper Setting Card -->
+      <div class="macos-dock-tray" style="padding: 16px; border-radius: 20px; margin-bottom: 14px; margin-top: 0;">
+        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 10px; font-weight: 600;">Custom Photo Wallpaper</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span id="custom-photo-status" style="font-size: 0.82rem; color: rgba(255,255,255,0.7);">Active: Fluid Preset</span>
+          <button class="macos-pill-btn" onclick="document.getElementById('sim-bg-picker').click()" style="padding: 6px 14px; font-size: 0.78rem; color: #fff;">Choose Photo</button>
+        </div>
+        <button id="btn-reset-fluid" class="macos-pill-btn" onclick="resetToFluid()" style="display: none; width: 100%; padding: 8px; font-size: 0.78rem; color: #fca5a5; background: rgba(239,68,68,0.2); margin-top: 6px;">
+          Remove Photo & Use Fluid Wallpaper
+        </button>
+      </div>
+
+      <div class="macos-dock-tray" style="padding: 16px; border-radius: 20px; margin-bottom: 14px; margin-top: 0;">
         <div style="font-size: 0.72rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 8px; font-weight: 600;">Custom Mindful Phrase</div>
-        <input type="text" id="setting-phrase-text" class="liquid-glass-pill" style="width: 100%; padding: 10px 12px; color: #fff; font-size: 0.82rem; outline: none;" value="I am opening my phone for a real purpose." onchange="savePhrase(this.value)">
+        <input type="text" id="setting-phrase-text" class="macos-pill-btn" style="width: 100%; padding: 10px 12px; color: #fff; font-size: 0.82rem; outline: none;" value="I am opening my phone for a real purpose." onchange="savePhrase(this.value)">
       </div>
 
-      <div class="liquid-glass" style="padding: 16px; border-radius: 20px;">
-        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 8px; font-weight: 600;">Configure 6 Home Apps</div>
+      <div class="macos-dock-tray" style="padding: 16px; border-radius: 20px; margin-top: 0;">
+        <div style="font-size: 0.72rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 8px; font-weight: 600;">Configure 6 Dock Apps</div>
         <div id="settings-app-picker" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
     </div>
 
   </div>
 
+  <!-- Bottom Wallpaper Toolbar -->
   <div class="wallpaper-toolbar">
-    <span style="font-size: 0.8rem; color: #9ca3af; margin-right: 4px;">Living Wallpaper:</span>
+    <span style="font-size: 0.8rem; color: #9ca3af; margin-right: 4px;">Wallpaper:</span>
     <div class="wp-circle" style="background: radial-gradient(circle, #7e22ce, #059669);" onclick="changeTheme('aurora')" title="Living Aurora"></div>
     <div class="wp-circle" style="background: radial-gradient(circle, #4338ca, #9333ea);" onclick="changeTheme('nebula')" title="Living Nebula"></div>
     <div class="wp-circle" style="background: radial-gradient(circle, #be185d, #7e22ce);" onclick="changeTheme('dusk')" title="Living Dusk"></div>
     <div class="wp-circle" style="background: radial-gradient(circle, #3f3f46, #18181b);" onclick="changeTheme('smoke')" title="Living Smoke"></div>
     <div class="wp-circle" style="background: #000000;" onclick="changeTheme('obsidian')" title="Living Obsidian"></div>
+    <span style="width: 1px; height: 16px; background: rgba(255,255,255,0.2);"></span>
+    <input type="file" id="sim-bg-picker" accept="image/*" style="display: none;" onchange="handlePhotoUpload(this)">
+    <button class="btn-upload-bg" onclick="document.getElementById('sim-bg-picker').click()">
+      <span>📷</span>
+      <span>Pick Photo BG</span>
+    </button>
   </div>
 
   <script>
@@ -399,6 +489,7 @@
     let sessionInterval = null;
     let sessionRemaining = 120;
     let longPressTimer = null;
+    let customPhotoActive = false;
 
     const THEME_ORBS = {
       aurora: ["rgba(126, 34, 206, 0.7)", "rgba(5, 150, 105, 0.65)", "rgba(30, 27, 75, 0.55)"],
@@ -409,10 +500,39 @@
     };
 
     function changeTheme(name) {
+      resetToFluid();
       const colors = THEME_ORBS[name] || THEME_ORBS.aurora;
       document.getElementById("living-orb-1").style.background = colors[0];
       document.getElementById("living-orb-2").style.background = colors[1];
       document.getElementById("living-orb-3").style.background = colors[2];
+    }
+
+    function handlePhotoUpload(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const chassis = document.getElementById("phone-chassis");
+          chassis.style.backgroundImage = `url(${e.target.result})`;
+          document.getElementById("photo-scrim").style.display = "block";
+          document.querySelectorAll(".living-orb-1, .living-orb-2, .living-orb-3").forEach(orb => orb.style.opacity = "0.15");
+          customPhotoActive = true;
+          document.getElementById("custom-photo-status").textContent = "Active: Custom Photo";
+          document.getElementById("custom-photo-status").style.color = "#4ade80";
+          document.getElementById("btn-reset-fluid").style.display = "block";
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function resetToFluid() {
+      const chassis = document.getElementById("phone-chassis");
+      chassis.style.backgroundImage = "none";
+      document.getElementById("photo-scrim").style.display = "none";
+      document.querySelectorAll(".living-orb-1, .living-orb-2, .living-orb-3").forEach(orb => orb.style.opacity = "1");
+      customPhotoActive = false;
+      document.getElementById("custom-photo-status").textContent = "Active: Fluid Preset";
+      document.getElementById("custom-photo-status").style.color = "rgba(255,255,255,0.7)";
+      document.getElementById("btn-reset-fluid").style.display = "none";
     }
 
     function startLongPress() {
@@ -435,35 +555,42 @@
     updateClock();
 
     function renderHomeApps() {
-      const container = document.getElementById("home-apps-list");
+      const container = document.getElementById("macos-dock-container");
       container.innerHTML = "";
 
       for (let i = 0; i < 6; i++) {
         const appId = homeApps[i];
         const app = ALL_AVAILABLE_APPS.find(a => a.id === appId);
 
-        const slot = document.createElement("div");
-        slot.className = "liquid-glass-pill app-slot-item";
+        const row = document.createElement("div");
+        row.className = "macos-dock-row";
         
         if (app) {
-          slot.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.15rem;">${app.icon}</span>
+          row.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span class="dock-dot"></span>
               <span class="app-slot-name">${app.name}</span>
             </div>
-            <span class="app-slot-arrow">→</span>
+            <span class="app-slot-arrow">›</span>
           `;
-          slot.onclick = (e) => { e.stopPropagation(); alert(`Launched ${app.name}`); };
+          row.onclick = (e) => { e.stopPropagation(); alert(`Launched ${app.name}`); };
         } else {
-          slot.style.borderStyle = "dashed";
-          slot.style.opacity = "0.5";
-          slot.innerHTML = `
-            <span class="app-slot-name" style="font-size: 0.9rem; font-style: italic;">+ Add Slot ${i+1}</span>
+          row.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span class="dock-dot empty"></span>
+              <span class="app-slot-name" style="color: rgba(255,255,255,0.35);">+ Add Slot ${i+1}</span>
+            </div>
             <span class="app-slot-arrow">+</span>
           `;
-          slot.onclick = (e) => { e.stopPropagation(); openSettings(); };
+          row.onclick = (e) => { e.stopPropagation(); openSettings(); };
         }
-        container.appendChild(slot);
+        container.appendChild(row);
+
+        if (i < 5) {
+          const div = document.createElement("div");
+          div.className = "macos-dock-divider";
+          container.appendChild(div);
+        }
       }
     }
 
@@ -502,55 +629,51 @@
     function startSessionTimer() {
       if (sessionInterval) clearInterval(sessionInterval);
       sessionRemaining = 120;
-      const badge = document.getElementById("session-countdown");
-      
+      updateSessionText();
       sessionInterval = setInterval(() => {
         sessionRemaining--;
-        const m = Math.floor(sessionRemaining / 60);
-        const s = String(sessionRemaining % 60).padStart(2, '0');
-        badge.textContent = `Unlocked (${m}m ${s}s left)`;
-
+        updateSessionText();
         if (sessionRemaining <= 0) {
           clearInterval(sessionInterval);
-          alert("Session expired. Relocking launcher.");
+          alert("Vault Session Expired: Returning to Minimal Home.");
           goHome();
         }
       }, 1000);
     }
 
+    function updateSessionText() {
+      const mins = Math.floor(sessionRemaining / 60);
+      const secs = String(sessionRemaining % 60).padStart(2, '0');
+      document.getElementById("session-countdown").textContent = `Unlocked (${mins}m ${secs}s left)`;
+    }
+
     function renderDrawerApps(filter = "") {
-      const list = document.getElementById("drawer-apps-list");
-      list.innerHTML = "";
+      const container = document.getElementById("drawer-apps-list");
+      container.innerHTML = "";
       const filtered = ALL_AVAILABLE_APPS.filter(a => a.name.toLowerCase().includes(filter.toLowerCase()));
 
       filtered.forEach(app => {
         const item = document.createElement("div");
-        item.className = "liquid-glass-pill";
+        item.className = "macos-pill-btn";
         item.style.padding = "12px 16px";
         item.style.display = "flex";
         item.style.justifyContent = "space-between";
         item.style.alignItems = "center";
         item.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.2rem;">${app.icon}</span>
-            <div>
-              <div style="font-size: 0.95rem; font-weight: 500; color: #fff;">${app.name}</div>
-              <div style="font-size: 0.72rem; color: rgba(255,255,255,0.5);">${app.category}</div>
-            </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 1.15rem;">${app.icon}</span>
+            <span style="font-size: 0.92rem; color: #fff; font-weight: 500;">${app.name}</span>
           </div>
-          <span style="font-size: 0.8rem; color: rgba(255,255,255,0.4);">Launch →</span>
+          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">${app.category}</span>
         `;
-        item.onclick = () => {
-          alert(`Launched ${app.name}`);
-          if (sessionInterval) clearInterval(sessionInterval);
-          goHome();
-        };
-        list.appendChild(item);
+        item.onclick = () => { alert(`Opening ${app.name}`); goHome(); };
+        container.appendChild(item);
       });
     }
 
     function filterDrawerApps() {
-      renderDrawerApps(document.getElementById("drawer-search").value);
+      const q = document.getElementById("drawer-search").value;
+      renderDrawerApps(q);
     }
 
     function openSettings() {
@@ -563,36 +686,31 @@
       container.innerHTML = "";
 
       for (let i = 0; i < 6; i++) {
+        const appId = homeApps[i];
+        const app = ALL_AVAILABLE_APPS.find(a => a.id === appId);
+
         const row = document.createElement("div");
-        row.className = "liquid-glass-pill";
-        row.style.padding = "10px 14px";
         row.style.display = "flex";
         row.style.justifyContent = "space-between";
         row.style.alignItems = "center";
-        const currentId = homeApps[i] || "";
-
-        let selectOptions = `<option value="">-- None (Empty Slot) --</option>`;
-        ALL_AVAILABLE_APPS.forEach(app => {
-          const selected = (app.id === currentId) ? "selected" : "";
-          selectOptions += `<option value="${app.id}" ${selected}>${app.name}</option>`;
-        });
+        row.style.padding = "8px 0";
+        row.style.borderBottom = "1px solid rgba(255,255,255,0.08)";
 
         row.innerHTML = `
-          <span style="font-size: 0.85rem; color: rgba(255,255,255,0.85);">Slot ${i + 1}</span>
-          <select onchange="updateHomeSlot(${i}, this.value)" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 8px; font-size: 0.8rem; outline: none;">
-            ${selectOptions}
+          <span style="font-size: 0.85rem; color: ${app ? '#fff' : 'rgba(255,255,255,0.4)'};">
+            Slot ${i+1}: ${app ? app.name : '(Empty Slot)'}
+          </span>
+          <select class="macos-pill-btn" style="padding: 4px 8px; font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.1); outline: none;" onchange="changeSlot(${i}, this.value)">
+            <option value="" style="background: #111;" ${!app ? 'selected' : ''}>-- Empty --</option>
+            ${ALL_AVAILABLE_APPS.map(a => `<option value="${a.id}" style="background: #111;" ${app && app.id === a.id ? 'selected' : ''}>${a.name}</option>`).join('')}
           </select>
         `;
         container.appendChild(row);
       }
     }
 
-    function updateHomeSlot(slotIndex, appId) {
-      if (appId) {
-        homeApps[slotIndex] = appId;
-      } else {
-        homeApps.splice(slotIndex, 1);
-      }
+    function changeSlot(index, appId) {
+      homeApps[index] = appId || null;
       renderHomeApps();
     }
 

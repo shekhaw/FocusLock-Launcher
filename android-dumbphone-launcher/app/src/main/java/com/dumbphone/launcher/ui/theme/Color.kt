@@ -20,6 +20,16 @@ val GlassWhiteMedium = Color(0x28FFFFFF)     // 16% white
 val GlassWhiteBorder = Color(0x35FFFFFF)     // 21% white
 val GlassWhiteHighlight = Color(0x55FFFFFF)  // 33% white
 
+// macOS Dock Glass Palette & Highlights
+val MacDockGlassTop = Color(0x2BFFFFFF)       // 17% white frosted top
+val MacDockGlassBottom = Color(0x14FFFFFF)    // 8% white deep floor
+val MacDockBorderTop = Color(0x8CFFFFFF)      // 55% white crisp specular top reflection
+val MacDockBorderMid = Color(0x30FFFFFF)      // 19% white mid rim
+val MacDockBorderBottom = Color(0x12FFFFFF)   // 7% white subtle bottom bevel
+val MacDockDivider = Color(0x18FFFFFF)        // Hairline glass divider between dock items
+val MacDockItemActive = Color(0x2EFFFFFF)     // Subtle highlight on tap
+
+
 enum class WallpaperTheme(val displayName: String) {
     AURORA("Aurora Night"),
     NEBULA("Cosmic Nebula"),
