@@ -29,6 +29,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.dumbphone.launcher.data.ScreenState
 import com.dumbphone.launcher.ui.components.AliveWallpaper
+import com.dumbphone.launcher.ui.components.GlassSettings
+import com.dumbphone.launcher.ui.components.LocalGlassSettings
 import com.dumbphone.launcher.ui.components.LocalWallpaperContainer
 import com.dumbphone.launcher.ui.screens.AppDrawerScreen
 import com.dumbphone.launcher.ui.screens.FrictionGateScreen
@@ -131,8 +133,21 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
+                    val glassOffset by viewModel.glassRefractionOffset.collectAsState()
+                    val glassDispersion by viewModel.glassDispersion.collectAsState()
+                    val glassTone by viewModel.glassTintTone.collectAsState()
+                    val glassAlpha by viewModel.glassTintAlpha.collectAsState()
+
                     // Active screen rendered in transparent surface over the shared wallpaper
-                    CompositionLocalProvider(LocalWallpaperContainer provides wallpaperContainer) {
+                    CompositionLocalProvider(
+                        LocalWallpaperContainer provides wallpaperContainer,
+                        LocalGlassSettings provides GlassSettings(
+                            refractionOffset = glassOffset,
+                            dispersion = glassDispersion,
+                            tintTone = glassTone,
+                            tintAlpha = glassAlpha
+                        )
+                    ) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
                             color = Color.Transparent

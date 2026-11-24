@@ -1,8 +1,13 @@
 package com.dumbphone.launcher.ui.screens
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,14 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
 import com.dumbphone.launcher.data.ScreenState
+import com.dumbphone.launcher.ui.components.ControlCenterSheet
 import com.dumbphone.launcher.ui.components.GlassTextShadow
 import com.dumbphone.launcher.ui.components.MacDockGlassCard
 import com.dumbphone.launcher.ui.components.MacDockGlassPill
@@ -32,6 +40,7 @@ import com.dumbphone.launcher.ui.viewmodel.LauncherViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 @Composable
 fun HomeScreen(
@@ -39,6 +48,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val homeApps by viewModel.homeApps.collectAsState()
+    val desktopWidgetType by viewModel.desktopWidgetType.collectAsState()
 
     var currentTime by remember { mutableStateOf("") }
     var currentDate by remember { mutableStateOf("") }
@@ -54,7 +64,7 @@ fun HomeScreen(
         }
     }
 
-    // Outer Edge-to-Edge Container (Transparent; continuous wallpaper is rendered in MainActivity)
+    // Outer Edge-to-Edge Container
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -72,15 +82,46 @@ fun HomeScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(start = 16.dp, end = 16.dp, top = 22.dp, bottom = 12.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Floating Clock & Date (Minimalist typography floating directly on wallpaper)
+            // Top Status & Control Center Launcher Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "FocusLock Liquid",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.50f),
+                    style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                )
+
+                MacDockGlassPill(
+                    modifier = Modifier
+                        .clickable { viewModel.openControlCenter() }
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = "⌘ Control",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White,
+                        style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                    )
+                }
+            }
+
+            // 1. Floating Clock, Date & Cycleable Liquid Glass Widget
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 18.dp),
+                    .padding(top = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -94,15 +135,51 @@ fun HomeScreen(
                     style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
                     color = Color.White.copy(alpha = 0.90f)
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Interactive Cycleable Liquid Glass Desktop Widget
+                MacDockGlassPill(
+                    modifier = Modifier
+                        .clickable { viewModel.cycleDesktopWidget() }
+                        .padding(horizontal = 16.dp, vertical = 7.dp)
+                ) {
+                    when (desktopWidgetType) {
+                        0 -> {
+                            Text(
+                                text = "☀️ 24°C • Mostly Sunny • H:27° L:16°",
+                                fontSize = 11.5.sp,
+                                color = Color.White,
+                                style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                            )
+                        }
+                        1 -> {
+                            Text(
+                                text = "⚡ Battery 85% • 4.2 GB RAM Free",
+                                fontSize = 11.5.sp,
+                                color = Color.White,
+                                style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = "🌱 42m Focus Today • 3 Mindful Unlocks",
+                                fontSize = 11.5.sp,
+                                color = Color.White,
+                                style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "“Simplicity is the ultimate sophistication.”",
                     style = Typography.labelSmall.copy(shadow = GlassTextShadow),
-                    color = Color.White.copy(alpha = 0.65f)
+                    color = Color.White.copy(alpha = 0.60f)
                 )
             }
 
-            // 2. Bottom Shelf Section: Authentic Horizontal macOS Dock
+            // 2. Bottom Shelf Section: Authentic Horizontal macOS Dock with Wave Animation
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -136,10 +213,10 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Authentic macOS Horizontal Dock Shelf
+                // Authentic macOS Horizontal Dock Shelf with Wave Magnification
                 MacDockHorizontalShelf(
                     homeApps = homeApps,
-                    onSlotClick = { index, app ->
+                    onSlotClick = { _, app ->
                         if (app != null) {
                             viewModel.launchApp(app.packageName)
                         } else {
@@ -149,13 +226,16 @@ fun HomeScreen(
                 )
             }
         }
+
+        // Liquid Glass Control Center Overlay
+        ControlCenterSheet(viewModel = viewModel)
     }
 }
 
 /**
- * Authentic Horizontal macOS Dock Shelf:
- * Sleek bottom glass shelf magnifying the wallpaper via AndroidLiquidGlassView,
- * with horizontal app slots, glass squircles, and crystalline text labels.
+ * Authentic Horizontal macOS Dock Shelf with Interactive Wave Magnification:
+ * When dragging or touching along the shelf, items expand and lift in an authentic
+ * macOS parabolic magnification wave with spring physics.
  */
 @Composable
 fun MacDockHorizontalShelf(
@@ -163,28 +243,80 @@ fun MacDockHorizontalShelf(
     onSlotClick: (Int, AppItem?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var touchX by remember { mutableStateOf<Float?>(null) }
+    val totalSlots = 6
+
     MacDockGlassCard(
         modifier = modifier
             .fillMaxWidth()
-            .height(84.dp),
+            .height(86.dp)
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { offset -> touchX = offset.x },
+                    onDrag = { change, _ ->
+                        change.consume()
+                        touchX = change.position.x
+                    },
+                    onDragEnd = { touchX = null },
+                    onDragCancel = { touchX = null }
+                )
+            },
         cornerRadius = 26.dp,
         refractionHeight = 20.dp,
         refractionOffset = 70.dp,
         dispersion = 0.55f
     ) {
-        Row(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 6.dp)
         ) {
-            homeApps.forEachIndexed { index, app ->
-                MacDockAppSlot(
-                    slotIndex = index,
-                    app = app,
-                    onClick = { onSlotClick(index, app) }
-                )
+            val totalWidthPx = constraints.maxWidth.toFloat()
+            val slotWidthPx = totalWidthPx / totalSlots
+
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                homeApps.forEachIndexed { index, app ->
+                    val slotCenterPx = (index + 0.5f) * slotWidthPx
+                    val currentTouch = touchX
+
+                    val targetScale = if (currentTouch != null) {
+                        val distance = abs(currentTouch - slotCenterPx)
+                        val maxDistance = slotWidthPx * 1.5f
+                        if (distance < maxDistance) {
+                            val factor = (maxDistance - distance) / maxDistance
+                            1.0f + 0.36f * factor
+                        } else 1.0f
+                    } else 1.0f
+
+                    val animatedScale by animateFloatAsState(
+                        targetValue = targetScale,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "dock_slot_scale_$index"
+                    )
+
+                    val animatedOffsetY by animateDpAsState(
+                        targetValue = if (animatedScale > 1.05f) (-(animatedScale - 1f) * 36f).dp else 0.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "dock_slot_offset_$index"
+                    )
+
+                    MacDockAppSlot(
+                        app = app,
+                        scale = animatedScale,
+                        offsetY = animatedOffsetY,
+                        onClick = { onSlotClick(index, app) }
+                    )
+                }
             }
         }
     }
@@ -195,8 +327,9 @@ fun MacDockHorizontalShelf(
  */
 @Composable
 fun MacDockAppSlot(
-    slotIndex: Int,
     app: AppItem?,
+    scale: Float,
+    offsetY: Dp,
     onClick: () -> Unit
 ) {
     val isAssigned = (app != null)
@@ -204,6 +337,11 @@ fun MacDockAppSlot(
     Column(
         modifier = Modifier
             .width(50.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                translationY = offsetY.toPx()
+            }
             .clickable(onClick = onClick)
             .padding(vertical = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -244,7 +382,6 @@ fun MacDockAppSlot(
             contentAlignment = Alignment.Center
         ) {
             if (app != null) {
-                // Styled Glyph / Initial of the App
                 val initial = if (app.label.isNotBlank()) app.label.take(1).uppercase() else "•"
                 Text(
                     text = initial,

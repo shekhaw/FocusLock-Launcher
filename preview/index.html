@@ -456,14 +456,26 @@
 
     <!-- 1. HOME SCREEN -->
     <div id="screen-home" class="screen active" style="justify-content: space-between;" onmousedown="startLongPress()" onmouseup="cancelLongPress()" onmouseleave="cancelLongPress()">
+      <!-- Top Status & Control Center Toggle -->
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 4px 0;">
+        <span style="font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">FocusLock Liquid</span>
+        <button class="macos-pill-btn" onclick="event.stopPropagation(); toggleControlCenter()" style="padding: 4px 12px; font-size: 0.72rem; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
+          ⌘ Control
+        </button>
+      </div>
+
       <!-- Floating Clock on wallpaper -->
       <div class="floating-clock">
         <div class="clock-time" id="home-clock">16:35</div>
         <div class="clock-date" id="home-date">Saturday, November 21</div>
-        <div class="focus-quote">“Simplicity is the ultimate sophistication.”</div>
+        <!-- Cycleable Liquid Glass Desktop Widget -->
+        <div class="macos-pill-btn" id="home-desktop-widget" onclick="event.stopPropagation(); cycleWidget()" style="padding: 6px 14px; font-size: 0.74rem; color: #fff; display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,0.85);">
+          ☀️ 24°C • Mostly Sunny • H:27° L:16°
+        </div>
+        <div class="focus-quote" style="margin-top: 8px;">“Simplicity is the ultimate sophistication.”</div>
       </div>
 
-      <!-- Bottom Shelf Section: Authentic Horizontal macOS Dock -->
+      <!-- Bottom Shelf Section: Authentic Horizontal macOS Dock with Wave Animation -->
       <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: auto;">
         <button class="macos-pill-btn btn-vault" onclick="event.stopPropagation(); openGate()" style="padding: 9px 20px; font-size: 0.8rem;">
           <span>🔒</span>
@@ -572,6 +584,77 @@
         <div style="position: relative; z-index: 2;">
           <div style="font-size: 0.72rem; color: rgba(255,255,255,0.65); text-transform: uppercase; margin-bottom: 8px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Configure 6 Dock Apps</div>
           <div id="settings-app-picker" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CONTROL CENTER MODAL -->
+    <div id="screen-control-center" style="display: none; position: absolute; inset: 0; z-index: 100; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 50px 20px 20px 20px; align-items: center; justify-content: center;" onclick="toggleControlCenter()">
+      <div class="macos-dock-tray" style="width: 100%; border-radius: 28px; padding: 20px; text-align: left; margin: 0;" onclick="event.stopPropagation()">
+        <div class="glass-caustic-sheen"></div>
+        <div style="position: relative; z-index: 2;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <span style="font-size: 1.05rem; font-weight: 600; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">⌘ Control Center</span>
+            <div style="display: flex; gap: 6px;">
+              <span class="macos-pill-btn" style="padding: 4px 8px; font-size: 0.7rem; color: #fff;">🔋 85%</span>
+              <button class="macos-pill-btn" onclick="toggleControlCenter()" style="padding: 4px 9px; font-size: 0.72rem; color: #fff; font-weight: bold;">✕</button>
+            </div>
+          </div>
+
+          <!-- 2x2 Toggles -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
+            <div class="macos-pill-btn toggle-card" id="toggle-wifi" onclick="toggleBtn('toggle-wifi')" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <span style="font-size: 1.1rem;">📶</span>
+              <div>
+                <div style="font-size: 0.74rem; font-weight: 600; color: #fff;">Wi-Fi</div>
+                <div style="font-size: 0.64rem; color: #4ade80;">Connected</div>
+              </div>
+            </div>
+            <div class="macos-pill-btn toggle-card" id="toggle-bt" onclick="toggleBtn('toggle-bt')" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <span style="font-size: 1.1rem;">⚡</span>
+              <div>
+                <div style="font-size: 0.74rem; font-weight: 600; color: #fff;">Bluetooth</div>
+                <div style="font-size: 0.64rem; color: #4ade80;">Active</div>
+              </div>
+            </div>
+            <div class="macos-pill-btn toggle-card" id="toggle-torch" onclick="toggleBtn('toggle-torch')" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <span style="font-size: 1.1rem;">🔦</span>
+              <div>
+                <div style="font-size: 0.74rem; font-weight: 600; color: #fff;">Torch</div>
+                <div style="font-size: 0.64rem; color: rgba(255,255,255,0.5);">Off</div>
+              </div>
+            </div>
+            <div class="macos-pill-btn toggle-card" id="toggle-dnd" onclick="toggleBtn('toggle-dnd')" style="padding: 8px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <span style="font-size: 1.1rem;">🌙</span>
+              <div>
+                <div style="font-size: 0.74rem; font-weight: 600; color: #fff;">Silence</div>
+                <div style="font-size: 0.64rem; color: rgba(255,255,255,0.5);">Off</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sliders -->
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 0.68rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 4px;">Brightness: <span id="bright-val">75%</span></div>
+            <input type="range" min="10" max="100" value="75" oninput="document.getElementById('bright-val').innerText=this.value+'%'" style="width: 100%; accent-color: #fff; cursor: pointer;">
+          </div>
+          <div style="margin-bottom: 14px;">
+            <div style="font-size: 0.68rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 4px;">Volume: <span id="vol-val">65%</span></div>
+            <input type="range" min="0" max="100" value="65" oninput="document.getElementById('vol-val').innerText=this.value+'%'" style="width: 100%; accent-color: #fff; cursor: pointer;">
+          </div>
+
+          <!-- Media Player -->
+          <div class="macos-dock-tray" style="margin: 0; padding: 10px 14px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="glass-caustic-sheen"></div>
+            <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 2;">
+              <span style="font-size: 1.3rem;">🎵</span>
+              <div>
+                <div style="font-size: 0.78rem; font-weight: 600; color: #fff;">Deep Focus Ambient</div>
+                <div style="font-size: 0.65rem; color: #4ade80;">Playing • Mindful Session</div>
+              </div>
+            </div>
+            <button class="macos-pill-btn" onclick="togglePlay(this)" style="padding: 4px 10px; font-size: 0.72rem; color: #fff; position: relative; z-index: 2;">⏸ Pause</button>
+          </div>
         </div>
       </div>
     </div>
@@ -836,7 +919,76 @@
 
     function changeSlot(index, appId) {
       homeApps[index] = appId || null;
-      renderHomeApps();
+      function toggleControlCenter() {
+      const modal = document.getElementById("screen-control-center");
+      modal.style.display = (modal.style.display === "flex") ? "none" : "flex";
+    }
+
+    const WIDGETS = [
+      "☀️ 24°C • Mostly Sunny • H:27° L:16°",
+      "⚡ Battery 85% • 4.2 GB RAM Free",
+      "🌱 42m Focus Today • 3 Mindful Unlocks"
+    ];
+    let currentWidgetIdx = 0;
+    function cycleWidget() {
+      currentWidgetIdx = (currentWidgetIdx + 1) % WIDGETS.length;
+      document.getElementById("home-desktop-widget").innerText = WIDGETS[currentWidgetIdx];
+    }
+
+    function toggleBtn(id) {
+      const el = document.getElementById(id);
+      const sub = el.querySelector("div div:nth-child(2)");
+      if (sub.innerText === "Off") {
+        sub.innerText = "Active";
+        sub.style.color = "#4ade80";
+        el.style.background = "rgba(255,255,255,0.28)";
+      } else {
+        sub.innerText = "Off";
+        sub.style.color = "rgba(255,255,255,0.5)";
+        el.style.background = "linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.08) 100%)";
+      }
+    }
+
+    function togglePlay(btn) {
+      if (btn.innerText.includes("Pause")) {
+        btn.innerText = "▶ Play";
+      } else {
+        btn.innerText = "⏸ Pause";
+      }
+    }
+
+    function attachDockWave() {
+      const shelf = document.getElementById("dock-shelf-container");
+      if (!shelf) return;
+      shelf.onmousemove = (e) => {
+        const rect = shelf.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const slots = shelf.querySelectorAll(".dock-app-slot");
+        const total = slots.length;
+        if (total === 0) return;
+        const slotWidth = rect.width / total;
+        slots.forEach((s, idx) => {
+          const center = (idx + 0.5) * slotWidth;
+          const dist = Math.abs(mouseX - center);
+          const maxDist = slotWidth * 1.6;
+          if (dist < maxDist) {
+            const factor = (maxDist - dist) / maxDist;
+            const scale = 1.0 + 0.36 * factor;
+            const translateY = -12 * factor;
+            s.style.transform = `translateY(${translateY}px) scale(${scale})`;
+          } else {
+            s.style.transform = `translateY(0px) scale(1)`;
+          }
+        });
+      };
+      shelf.onmouseleave = () => {
+        const slots = shelf.querySelectorAll(".dock-app-slot");
+        slots.forEach(s => s.style.transform = `translateY(0px) scale(1)`);
+      };
+    }
+
+    renderHomeApps();
+    attachDockWave();
     }
 
     function savePhrase(newPhrase) {
@@ -845,7 +997,76 @@
       }
     }
 
+    function toggleControlCenter() {
+      const modal = document.getElementById("screen-control-center");
+      modal.style.display = (modal.style.display === "flex") ? "none" : "flex";
+    }
+
+    const WIDGETS = [
+      "☀️ 24°C • Mostly Sunny • H:27° L:16°",
+      "⚡ Battery 85% • 4.2 GB RAM Free",
+      "🌱 42m Focus Today • 3 Mindful Unlocks"
+    ];
+    let currentWidgetIdx = 0;
+    function cycleWidget() {
+      currentWidgetIdx = (currentWidgetIdx + 1) % WIDGETS.length;
+      document.getElementById("home-desktop-widget").innerText = WIDGETS[currentWidgetIdx];
+    }
+
+    function toggleBtn(id) {
+      const el = document.getElementById(id);
+      const sub = el.querySelector("div div:nth-child(2)");
+      if (sub.innerText === "Off") {
+        sub.innerText = "Active";
+        sub.style.color = "#4ade80";
+        el.style.background = "rgba(255,255,255,0.28)";
+      } else {
+        sub.innerText = "Off";
+        sub.style.color = "rgba(255,255,255,0.5)";
+        el.style.background = "linear-gradient(180deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.08) 100%)";
+      }
+    }
+
+    function togglePlay(btn) {
+      if (btn.innerText.includes("Pause")) {
+        btn.innerText = "▶ Play";
+      } else {
+        btn.innerText = "⏸ Pause";
+      }
+    }
+
+    function attachDockWave() {
+      const shelf = document.getElementById("dock-shelf-container");
+      if (!shelf) return;
+      shelf.onmousemove = (e) => {
+        const rect = shelf.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const slots = shelf.querySelectorAll(".dock-app-slot");
+        const total = slots.length;
+        if (total === 0) return;
+        const slotWidth = rect.width / total;
+        slots.forEach((s, idx) => {
+          const center = (idx + 0.5) * slotWidth;
+          const dist = Math.abs(mouseX - center);
+          const maxDist = slotWidth * 1.6;
+          if (dist < maxDist) {
+            const factor = (maxDist - dist) / maxDist;
+            const scale = 1.0 + 0.36 * factor;
+            const translateY = -12 * factor;
+            s.style.transform = `translateY(${translateY}px) scale(${scale})`;
+          } else {
+            s.style.transform = `translateY(0px) scale(1)`;
+          }
+        });
+      };
+      shelf.onmouseleave = () => {
+        const slots = shelf.querySelectorAll(".dock-app-slot");
+        slots.forEach(s => s.style.transform = `translateY(0px) scale(1)`);
+      };
+    }
+
     renderHomeApps();
+    attachDockWave();
   </script>
 </body>
 </html>

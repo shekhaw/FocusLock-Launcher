@@ -1,6 +1,9 @@
 package com.dumbphone.launcher.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.hardware.camera2.CameraManager
+import android.media.AudioManager
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,6 +58,39 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     private val _sessionSecondsRemaining = MutableStateFlow(120)
     val sessionSecondsRemaining: StateFlow<Int> = _sessionSecondsRemaining.asStateFlow()
 
+    // Control Center & Quick Settings state
+    private val _isControlCenterOpen = MutableStateFlow(false)
+    val isControlCenterOpen: StateFlow<Boolean> = _isControlCenterOpen.asStateFlow()
+
+    private val _isTorchOn = MutableStateFlow(false)
+    val isTorchOn: StateFlow<Boolean> = _isTorchOn.asStateFlow()
+
+    private val _volumePercent = MutableStateFlow(0.65f)
+    val volumePercent: StateFlow<Float> = _volumePercent.asStateFlow()
+
+    private val _brightnessPercent = MutableStateFlow(0.75f)
+    val brightnessPercent: StateFlow<Float> = _brightnessPercent.asStateFlow()
+
+    private val _isMusicPlaying = MutableStateFlow(false)
+    val isMusicPlaying: StateFlow<Boolean> = _isMusicPlaying.asStateFlow()
+
+    // Desktop glass widgets (0: Weather, 1: Battery & System, 2: Mindful Focus)
+    private val _desktopWidgetType = MutableStateFlow(0)
+    val desktopWidgetType: StateFlow<Int> = _desktopWidgetType.asStateFlow()
+
+    // Liquid Glass Tuning Studio
+    private val _glassRefractionOffset = MutableStateFlow(70f)
+    val glassRefractionOffset: StateFlow<Float> = _glassRefractionOffset.asStateFlow()
+
+    private val _glassDispersion = MutableStateFlow(0.55f)
+    val glassDispersion: StateFlow<Float> = _glassDispersion.asStateFlow()
+
+    private val _glassTintTone = MutableStateFlow("CLEAR")
+    val glassTintTone: StateFlow<String> = _glassTintTone.asStateFlow()
+
+    private val _glassTintAlpha = MutableStateFlow(0.0f)
+    val glassTintAlpha: StateFlow<Float> = _glassTintAlpha.asStateFlow()
+
     private var sessionTimerJob: Job? = null
 
     init {
@@ -69,6 +105,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             _wallpaperTheme.value = prefs.getWallpaperTheme()
             _hasCustomWallpaper.value = prefs.isCustomWallpaperEnabled()
             _wallpaperUpdateTrigger.value = prefs.getCustomWallpaperTimestamp()
+
+            _glassRefractionOffset.value = prefs.getGlassRefractionOffset()
+            _glassDispersion.value = prefs.getGlassDispersion()
+            _glassTintTone.value = prefs.getGlassTintTone()
+            _glassTintAlpha.value = prefs.getGlassTintAlpha()
 
             val installed = repository.getInstalledApps()
             _allInstalledApps.value = installed
@@ -225,5 +266,82 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     fun getCustomWallpaperFile(): File {
         return prefs.getCustomWallpaperFile(getApplication())
+    }
+
+    // Control Center Management
+    fun openControlCenter() {
+        _isControlCenterOpen.value = true
+    }
+
+    fun closeControlCenter() {
+        _isControlCenterOpen.value = false
+    }
+
+    fun toggleControlCenter() {
+        _isControlCenterOpen.value = !_isControlCenterOpen.value
+    }
+
+    fun toggleTorch() {
+        val newState = !_isTorchOn.value
+        try {
+            val cameraManager = getApplication<Application>().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            val cameraId = cameraManager.cameraIdList.firstOrNull()
+            if (cameraId != null) {
+                cameraManager.setTorchMode(cameraId, newState)
+                _isTorchOn.value = newState
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _isTorchOn.value = newState
+        }
+    }
+
+    fun setVolumePercent(percent: Float) {
+        val clamped = percent.coerceIn(0f, 1f)
+        _volumePercent.value = clamped
+        try {
+            val audioManager = getApplication<Application>().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val target = (maxVol * clamped).toInt()
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    fun setBrightnessPercent(percent: Float) {
+        _brightnessPercent.value = percent.coerceIn(0.05f, 1f)
+    }
+
+    fun toggleMusic() {
+        _isMusicPlaying.value = !_isMusicPlaying.value
+    }
+
+    fun cycleDesktopWidget() {
+        _desktopWidgetType.value = (_desktopWidgetType.value + 1) % 3
+    }
+
+    // Liquid Glass Studio Customization
+    fun setGlassRefractionOffset(value: Float) {
+        _glassRefractionOffset.value = value
+        prefs.setGlassRefractionOffset(value)
+    }
+
+    fun setGlassDispersion(value: Float) {
+        _glassDispersion.value = value
+        prefs.setGlassDispersion(value)
+    }
+
+    fun setGlassTintTone(tone: String, alpha: Float) {
+        _glassTintTone.value = tone
+        _glassTintAlpha.value = alpha
+        prefs.setGlassTintTone(tone)
+        prefs.setGlassTintAlpha(alpha)
+    }
+
+    fun resetGlassToDefault() {
+        setGlassRefractionOffset(70f)
+        setGlassDispersion(0.55f)
+        setGlassTintTone("CLEAR", 0.0f)
     }
 }

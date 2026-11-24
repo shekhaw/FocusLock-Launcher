@@ -23,6 +23,10 @@ class PreferencesManager(context: Context) {
         private const val CUSTOM_WALLPAPER_FILENAME = "custom_wallpaper.jpg"
         private const val DEFAULT_PHRASE = "I am opening my phone for a real purpose."
         private const val DEFAULT_PIN = "1234"
+        private const val KEY_GLASS_REFRACTION_OFFSET = "key_glass_refraction_offset"
+        private const val KEY_GLASS_DISPERSION = "key_glass_dispersion"
+        private const val KEY_GLASS_TINT_TONE = "key_glass_tint_tone"
+        private const val KEY_GLASS_TINT_ALPHA = "key_glass_tint_alpha"
     }
 
     fun getHomeAppPackages(): List<String> {
@@ -134,5 +138,25 @@ class PreferencesManager(context: Context) {
             .putBoolean(KEY_CUSTOM_WALLPAPER_ENABLED, false)
             .putLong(KEY_CUSTOM_WALLPAPER_TIMESTAMP, System.currentTimeMillis())
             .apply()
+    }
+
+    fun getGlassRefractionOffset(): Float = prefs.getFloat(KEY_GLASS_REFRACTION_OFFSET, 70f)
+    fun setGlassRefractionOffset(value: Float) {
+        prefs.edit().putFloat(KEY_GLASS_REFRACTION_OFFSET, value).apply()
+    }
+
+    fun getGlassDispersion(): Float = prefs.getFloat(KEY_GLASS_DISPERSION, 0.55f)
+    fun setGlassDispersion(value: Float) {
+        prefs.edit().putFloat(KEY_GLASS_DISPERSION, value).apply()
+    }
+
+    fun getGlassTintTone(): String = prefs.getString(KEY_GLASS_TINT_TONE, "CLEAR") ?: "CLEAR"
+    fun setGlassTintTone(tone: String) {
+        prefs.edit().putString(KEY_GLASS_TINT_TONE, tone).apply()
+    }
+
+    fun getGlassTintAlpha(): Float = prefs.getFloat(KEY_GLASS_TINT_ALPHA, 0.0f)
+    fun setGlassTintAlpha(alpha: Float) {
+        prefs.edit().putFloat(KEY_GLASS_TINT_ALPHA, alpha).apply()
     }
 }

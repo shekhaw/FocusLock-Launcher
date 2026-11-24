@@ -3,6 +3,8 @@
 
     <!-- Allows launcher to discover and list all launchable apps installed on device -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 
     <application
         android:name=".LauncherApp"

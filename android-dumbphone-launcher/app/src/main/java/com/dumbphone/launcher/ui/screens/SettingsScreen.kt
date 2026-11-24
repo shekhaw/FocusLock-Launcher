@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dumbphone.launcher.data.AppItem
@@ -44,6 +45,9 @@ fun SettingsScreen(
     val currentPin by viewModel.targetPin.collectAsState()
     val wallpaperTheme by viewModel.wallpaperTheme.collectAsState()
     val hasCustomWallpaper by viewModel.hasCustomWallpaper.collectAsState()
+    val refractionOffset by viewModel.glassRefractionOffset.collectAsState()
+    val dispersion by viewModel.glassDispersion.collectAsState()
+    val tintTone by viewModel.glassTintTone.collectAsState()
 
     var phraseText by remember(currentPhrase) { mutableStateOf(currentPhrase) }
     var pinText by remember(currentPin) { mutableStateOf(currentPin) }
@@ -205,6 +209,157 @@ fun SettingsScreen(
                                         Text("✓ Active", style = Typography.labelSmall.copy(shadow = GlassTextShadow), color = Color.White)
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+
+                // Section 0.5: Liquid Glass Tuning Studio
+                item {
+                    Text(
+                        text = "LIQUID GLASS TUNING STUDIO",
+                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                        color = Color.White.copy(alpha = 0.65f)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    MacDockGlassCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        cornerRadius = 24.dp
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            // 1. Refraction Magnification Lens
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Optical Magnification Lens",
+                                        style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "-${refractionOffset.toInt()}dp",
+                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                        color = Color(0xFF4ADE80)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Slider(
+                                    value = refractionOffset,
+                                    onValueChange = { viewModel.setGlassRefractionOffset(it) },
+                                    valueRange = 30f..120f,
+                                    steps = 8,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = Color.White,
+                                        activeTrackColor = Color.White,
+                                        inactiveTrackColor = Color.White.copy(alpha = 0.2f)
+                                    )
+                                )
+                            }
+
+                            MacDockGlassDivider(paddingHorizontal = 0.dp)
+
+                            // 2. Prism Rainbow Dispersion
+                            Column {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "Rainbow Prism Dispersion",
+                                        style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "${(dispersion * 100).toInt()}%",
+                                        style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                        color = Color(0xFF38BDF8)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Slider(
+                                    value = dispersion,
+                                    onValueChange = { viewModel.setGlassDispersion(it) },
+                                    valueRange = 0.0f..1.0f,
+                                    steps = 9,
+                                    colors = SliderDefaults.colors(
+                                        thumbColor = Color.White,
+                                        activeTrackColor = Color.White,
+                                        inactiveTrackColor = Color.White.copy(alpha = 0.2f)
+                                    )
+                                )
+                            }
+
+                            MacDockGlassDivider(paddingHorizontal = 0.dp)
+
+                            // 3. Glass Tint Tone Presets
+                            Text(
+                                text = "GLASS TINT TONES",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White.copy(alpha = 0.55f),
+                                style = Typography.labelSmall.copy(shadow = GlassTextShadow)
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                listOf(
+                                    Triple("CLEAR", "💎 Clear", 0.0f),
+                                    Triple("SMOKE", "🌑 Smoke", 0.12f),
+                                    Triple("ICE", "❄️ Ice", 0.12f),
+                                    Triple("ROSE", "🌸 Rose", 0.12f),
+                                    Triple("EMERALD", "🌲 Jade", 0.12f)
+                                ).forEach { (toneKey, label, alpha) ->
+                                    val isSelected = (tintTone == toneKey)
+                                    MacDockGlassPill(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { viewModel.setGlassTintTone(toneKey, alpha) }
+                                            .padding(vertical = 7.dp)
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            fontSize = 9.5.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f),
+                                            textAlign = TextAlign.Center,
+                                            style = Typography.labelSmall.copy(shadow = GlassTextShadow),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
+                            }
+
+                            MacDockGlassDivider(paddingHorizontal = 0.dp)
+
+                            // 4. Reset Button
+                            MacDockGlassPill(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.resetGlassToDefault() }
+                                    .padding(vertical = 9.dp)
+                            ) {
+                                Text(
+                                    text = "Reset Glass to Factory Default ↺",
+                                    fontSize = 12.sp,
+                                    color = Color.White.copy(alpha = 0.85f),
+                                    fontWeight = FontWeight.Medium,
+                                    style = Typography.bodyMedium.copy(shadow = GlassTextShadow),
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
                             }
                         }
                     }

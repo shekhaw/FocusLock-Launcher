@@ -26,6 +26,16 @@ import com.dumbphone.launcher.ui.theme.*
 // CompositionLocal for the wallpaper sampling source
 val LocalWallpaperContainer = staticCompositionLocalOf<ViewGroup?> { null }
 
+// Global Glass Settings configured via Glass Tuning Studio
+data class GlassSettings(
+    val refractionOffset: Float = 70f,
+    val dispersion: Float = 0.55f,
+    val tintTone: String = "CLEAR",
+    val tintAlpha: Float = 0.0f
+)
+
+val LocalGlassSettings = staticCompositionLocalOf { GlassSettings() }
+
 // High-contrast text shadow for physical glass over any light/dark wallpapers
 val GlassTextShadow = Shadow(
     color = Color.Black.copy(alpha = 0.85f),
@@ -38,24 +48,36 @@ val GlassTextShadow = Shadow(
  * Genuine optical liquid glass container powered by AndroidLiquidGlassView (QmDeve).
  * Samples the live background wallpaper view and applies real GPU AGSL convex lens
  * magnification, multi-wavelength chromatic dispersion prism split, and specular rim reflections.
- *
- * Optically clear (tintAlpha = 0.0f) so it never blows out to solid white.
  */
 @Composable
 fun MacDockGlassCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 26.dp,
     refractionHeight: Dp = 20.dp,
-    refractionOffset: Dp = 70.dp,
-    dispersion: Float = 0.55f,
+    refractionOffset: Dp? = null,
+    dispersion: Float? = null,
     blurRadius: Float = 0.01f,
     content: @Composable BoxScope.() -> Unit
 ) {
     val wallpaperSource = LocalWallpaperContainer.current
+    val globalGlass = LocalGlassSettings.current
     val density = LocalDensity.current
+
+    val effectiveOffsetDp = refractionOffset ?: globalGlass.refractionOffset.dp
+    val effectiveDispersion = dispersion ?: globalGlass.dispersion
+    val effectiveTintAlpha = globalGlass.tintAlpha
+
+    val (tintR, tintG, tintB) = when (globalGlass.tintTone) {
+        "SMOKE" -> Triple(0.15f, 0.15f, 0.18f)
+        "ICE" -> Triple(0.0f, 0.83f, 1.0f)
+        "ROSE" -> Triple(1.0f, 0.41f, 0.70f)
+        "EMERALD" -> Triple(0.0f, 1.0f, 0.53f)
+        else -> Triple(1.0f, 1.0f, 1.0f)
+    }
+
     val cornerRadiusPx = with(density) { cornerRadius.toPx() }
     val refractionHeightPx = with(density) { refractionHeight.toPx() }
-    val refractionOffsetPx = with(density) { refractionOffset.toPx() }
+    val refractionOffsetPx = with(density) { effectiveOffsetDp.toPx() }
     val shape = RoundedCornerShape(cornerRadius)
 
     Box(
@@ -77,9 +99,12 @@ fun MacDockGlassCard(
                         setCornerRadius(cornerRadiusPx)
                         setRefractionHeight(refractionHeightPx)
                         setRefractionOffset(refractionOffsetPx)
-                        setDispersion(dispersion)
+                        setDispersion(effectiveDispersion)
                         setBlurRadius(blurRadius)
-                        setTintAlpha(0.0f) // Optical clarity, NO milky white blowout!
+                        setTintColorRed(tintR)
+                        setTintColorGreen(tintG)
+                        setTintColorBlue(tintB)
+                        setTintAlpha(effectiveTintAlpha)
                         bind(wallpaperSource)
                     }
                 },
@@ -87,9 +112,12 @@ fun MacDockGlassCard(
                     view.setCornerRadius(cornerRadiusPx)
                     view.setRefractionHeight(refractionHeightPx)
                     view.setRefractionOffset(refractionOffsetPx)
-                    view.setDispersion(dispersion)
+                    view.setDispersion(effectiveDispersion)
                     view.setBlurRadius(blurRadius)
-                    view.setTintAlpha(0.0f)
+                    view.setTintColorRed(tintR)
+                    view.setTintColorGreen(tintG)
+                    view.setTintColorBlue(tintB)
+                    view.setTintAlpha(effectiveTintAlpha)
                     view.bind(wallpaperSource)
                 }
             )
@@ -161,11 +189,21 @@ fun MacDockGlassPill(
     content: @Composable BoxScope.() -> Unit
 ) {
     val wallpaperSource = LocalWallpaperContainer.current
+    val globalGlass = LocalGlassSettings.current
     val density = LocalDensity.current
+
     val cornerRadiusPx = with(density) { 50.dp.toPx() }
     val refractionHeightPx = with(density) { 16.dp.toPx() }
-    val refractionOffsetPx = with(density) { 50.dp.toPx() }
+    val refractionOffsetPx = with(density) { (globalGlass.refractionOffset * 0.75f).dp.toPx() }
     val shape = RoundedCornerShape(50)
+
+    val (tintR, tintG, tintB) = when (globalGlass.tintTone) {
+        "SMOKE" -> Triple(0.15f, 0.15f, 0.18f)
+        "ICE" -> Triple(0.0f, 0.83f, 1.0f)
+        "ROSE" -> Triple(1.0f, 0.41f, 0.70f)
+        "EMERALD" -> Triple(0.0f, 1.0f, 0.53f)
+        else -> Triple(1.0f, 1.0f, 1.0f)
+    }
 
     Box(
         modifier = modifier
@@ -185,9 +223,12 @@ fun MacDockGlassPill(
                         setCornerRadius(cornerRadiusPx)
                         setRefractionHeight(refractionHeightPx)
                         setRefractionOffset(refractionOffsetPx)
-                        setDispersion(0.60f)
+                        setDispersion(globalGlass.dispersion)
                         setBlurRadius(0.01f)
-                        setTintAlpha(0.0f)
+                        setTintColorRed(tintR)
+                        setTintColorGreen(tintG)
+                        setTintColorBlue(tintB)
+                        setTintAlpha(globalGlass.tintAlpha)
                         bind(wallpaperSource)
                     }
                 },
@@ -195,8 +236,11 @@ fun MacDockGlassPill(
                     view.setCornerRadius(cornerRadiusPx)
                     view.setRefractionHeight(refractionHeightPx)
                     view.setRefractionOffset(refractionOffsetPx)
-                    view.setDispersion(0.60f)
-                    view.setTintAlpha(0.0f)
+                    view.setDispersion(globalGlass.dispersion)
+                    view.setTintColorRed(tintR)
+                    view.setTintColorGreen(tintG)
+                    view.setTintColorBlue(tintB)
+                    view.setTintAlpha(globalGlass.tintAlpha)
                     view.bind(wallpaperSource)
                 }
             )
