@@ -1,5 +1,7 @@
 package com.dumbphone.launcher.ui.components
 
+import android.content.Context
+import android.os.BatteryManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,6 +25,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,15 +38,25 @@ fun ControlCenterSheet(
     viewModel: LauncherViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val isOpen by viewModel.isControlCenterOpen.collectAsState()
     val isTorchOn by viewModel.isTorchOn.collectAsState()
     val volumePercent by viewModel.volumePercent.collectAsState()
     val brightnessPercent by viewModel.brightnessPercent.collectAsState()
     val isMusicPlaying by viewModel.isMusicPlaying.collectAsState()
+    val wifiActive by viewModel.isWifiEnabled.collectAsState()
+    val bluetoothActive by viewModel.isBluetoothEnabled.collectAsState()
+    val dndActive by viewModel.isSilentMode.collectAsState()
 
-    var wifiActive by remember { mutableStateOf(true) }
-    var bluetoothActive by remember { mutableStateOf(true) }
-    var dndActive by remember { mutableStateOf(false) }
+    val batteryPercent = remember(isOpen) {
+        try {
+            val bm = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            val cap = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+            if (cap > 0) cap.coerceIn(1, 100) else 85
+        } catch (e: Exception) {
+            85
+        }
+    }
 
     AnimatedVisibility(
         visible = isOpen,
@@ -102,7 +115,7 @@ fun ControlCenterSheet(
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Text(
-                                    text = "🔋 85%",
+                                    text = "🔋 $batteryPercent%",
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White,
@@ -127,7 +140,7 @@ fun ControlCenterSheet(
 
                     MacDockGlassDivider(paddingHorizontal = 0.dp)
 
-                    // 2x2 Glass Quick Toggles
+                    // 2x2 Glass Quick Toggles (Real System Actions)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -137,7 +150,7 @@ fun ControlCenterSheet(
                             label = "Wi-Fi",
                             subtitle = if (wifiActive) "Connected" else "Off",
                             isActive = wifiActive,
-                            onClick = { wifiActive = !wifiActive },
+                            onClick = { viewModel.toggleWifi(context) },
                             modifier = Modifier.weight(1f)
                         )
 
@@ -146,7 +159,7 @@ fun ControlCenterSheet(
                             label = "Bluetooth",
                             subtitle = if (bluetoothActive) "Ready" else "Off",
                             isActive = bluetoothActive,
-                            onClick = { bluetoothActive = !bluetoothActive },
+                            onClick = { viewModel.toggleBluetooth(context) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -169,7 +182,7 @@ fun ControlCenterSheet(
                             label = "Silence",
                             subtitle = if (dndActive) "Active" else "Off",
                             isActive = dndActive,
-                            onClick = { dndActive = !dndActive },
+                            onClick = { viewModel.toggleSilence(context) },
                             modifier = Modifier.weight(1f)
                         )
                     }

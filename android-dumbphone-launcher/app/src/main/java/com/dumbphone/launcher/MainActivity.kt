@@ -63,6 +63,18 @@ class MainActivity : ComponentActivity() {
                     viewModel.navigateTo(ScreenState.HOME)
                 }
 
+                // Real Hardware Display Brightness Control
+                val screenBrightness by viewModel.brightnessPercent.collectAsState()
+                LaunchedEffect(screenBrightness) {
+                    try {
+                        val lp = window.attributes
+                        lp.screenBrightness = screenBrightness.coerceIn(0.02f, 1.0f)
+                        window.attributes = lp
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
                 val customWallpaperBitmap = remember(hasCustomWallpaper, wallpaperUpdateTrigger) {
                     if (hasCustomWallpaper) {
                         val file = viewModel.getCustomWallpaperFile()

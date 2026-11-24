@@ -1,10 +1,17 @@
 package com.dumbphone.launcher.ui.viewmodel
 
 import android.app.Application
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.Intent
+import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioManager
 import android.net.Uri
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.provider.Settings
+import android.view.KeyEvent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dumbphone.launcher.data.*
@@ -64,6 +71,15 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     private val _isTorchOn = MutableStateFlow(false)
     val isTorchOn: StateFlow<Boolean> = _isTorchOn.asStateFlow()
+
+    private val _isWifiEnabled = MutableStateFlow(true)
+    val isWifiEnabled: StateFlow<Boolean> = _isWifiEnabled.asStateFlow()
+
+    private val _isBluetoothEnabled = MutableStateFlow(false)
+    val isBluetoothEnabled: StateFlow<Boolean> = _isBluetoothEnabled.asStateFlow()
+
+    private val _isSilentMode = MutableStateFlow(false)
+    val isSilentMode: StateFlow<Boolean> = _isSilentMode.asStateFlow()
 
     private val _volumePercent = MutableStateFlow(0.65f)
     val volumePercent: StateFlow<Float> = _volumePercent.asStateFlow()
@@ -270,6 +286,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     // Control Center Management
     fun openControlCenter() {
+        refreshSystemControls()
         _isControlCenterOpen.value = true
     }
 
@@ -278,21 +295,127 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun toggleControlCenter() {
+        if (!_isControlCenterOpen.value) {
+            refreshSystemControls()
+        }
         _isControlCenterOpen.value = !_isControlCenterOpen.value
     }
 
+    fun refreshSystemControls() {
+        val ctx = getApplication<Application>()
+        try {
+            val wifi = ctx.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            _isWifiEnabled.value = wifi?.isWifiEnabled == true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            val bt = BluetoothAdapter.getDefaultAdapter()
+            _isBluetoothEnabled.value = bt?.isEnabled == true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            val audio = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            _isSilentMode.value = (audio.ringerMode == AudioManager.RINGER_MODE_SILENT || audio.ringerMode == AudioManager.RINGER_MODE_VIBRATE)
+
+            val maxVol = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val curVol = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+            if (maxVol > 0) {
+                _volumePercent.value = (curVol.toFloat() / maxVol.toFloat()).coerceIn(0f, 1f)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun toggleTorch() {
+        val ctx = getApplication<Application>()
         val newState = !_isTorchOn.value
         try {
-            val cameraManager = getApplication<Application>().getSystemService(Context.CAMERA_SERVICE) as CameraManager
-            val cameraId = cameraManager.cameraIdList.firstOrNull()
-            if (cameraId != null) {
-                cameraManager.setTorchMode(cameraId, newState)
-                _isTorchOn.value = newState
+            val cameraManager = ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            for (id in cameraManager.cameraIdList) {
+                val chars = cameraManager.getCameraCharacteristics(id)
+                val hasFlash = chars.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) ?: false
+                if (hasFlash) {
+                    cameraManager.setTorchMode(id, newState)
+                    _isTorchOn.value = newState
+                    break
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
             _isTorchOn.value = newState
+        }
+    }
+
+    fun toggleWifi(context: Context) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val intent = Intent(Settings.Panel.ACTION_WIFI).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
+            } else {
+                val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+                @Suppress("DEPRECATION")
+                wifi?.let {
+                    val next = !it.isWifiEnabled
+                    it.isWifiEnabled = next
+                    _isWifiEnabled.value = next
+                }
+            }
+        } catch (e: Exception) {
+            val intent = Intent(Settings.ACTION_WIFI_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        }
+    }
+
+    fun toggleBluetooth(context: Context) {
+        try {
+            val bt = BluetoothAdapter.getDefaultAdapter()
+            if (bt != null && Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                @Suppress("DEPRECATION")
+                if (bt.isEnabled) {
+                    bt.disable()
+                    _isBluetoothEnabled.value = false
+                } else {
+                    bt.enable()
+                    _isBluetoothEnabled.value = true
+                }
+            } else {
+                val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
+            }
+        } catch (e: Exception) {
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        }
+    }
+
+    fun toggleSilence(context: Context) {
+        try {
+            val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (audio.ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+                audio.ringerMode = AudioManager.RINGER_MODE_VIBRATE
+                _isSilentMode.value = true
+            } else {
+                audio.ringerMode = AudioManager.RINGER_MODE_NORMAL
+                _isSilentMode.value = false
+            }
+        } catch (e: Exception) {
+            val intent = Intent(Settings.ACTION_SOUND_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
         }
     }
 
@@ -303,18 +426,28 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             val audioManager = getApplication<Application>().getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
             val target = (maxVol * clamped).toInt()
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0)
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, target, AudioManager.FLAG_SHOW_UI)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun setBrightnessPercent(percent: Float) {
-        _brightnessPercent.value = percent.coerceIn(0.05f, 1f)
+        _brightnessPercent.value = percent.coerceIn(0.02f, 1f)
     }
 
     fun toggleMusic() {
-        _isMusicPlaying.value = !_isMusicPlaying.value
+        try {
+            val audioManager = getApplication<Application>().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val eventDown = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+            val eventUp = KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+            audioManager.dispatchMediaKeyEvent(eventDown)
+            audioManager.dispatchMediaKeyEvent(eventUp)
+            _isMusicPlaying.value = !_isMusicPlaying.value
+        } catch (e: Exception) {
+            e.printStackTrace()
+            _isMusicPlaying.value = !_isMusicPlaying.value
+        }
     }
 
     fun cycleDesktopWidget() {

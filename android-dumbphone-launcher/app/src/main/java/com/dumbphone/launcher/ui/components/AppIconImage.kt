@@ -6,9 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -27,20 +24,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Apple iOS-grade Squircle App Icon:
- * Renders the authentic, high-resolution native Android app icon with Apple continuous
- * curvature squircles, subtle specular edge highlight, and soft ambient drop shadow.
+ * Clean Native Android App Icon:
+ * Renders the authentic, high-resolution native Android app icon cleanly with natural transparency.
+ * Eliminates artificial squircle bounding boxes, mismatched corner outlines, and grey corner shadows
+ * so circular and freeform app icons float seamlessly on the macOS Dock liquid glass shelf.
  */
 @Composable
 fun AppIconImage(
     drawable: Drawable?,
     label: String,
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 13.dp,
-    showSpecularBorder: Boolean = true
+    cornerRadius: Dp? = null,
+    showSpecularBorder: Boolean = false
 ) {
-    val shape = RoundedCornerShape(cornerRadius)
-
     val imageBitmap = remember(drawable) {
         drawable?.let { d ->
             try {
@@ -62,71 +58,43 @@ fun AppIconImage(
         }
     }
 
-    Box(
-        modifier = modifier
-            .shadow(
-                elevation = 6.dp,
-                shape = shape,
-                ambientColor = Color.Black.copy(alpha = 0.45f),
-                spotColor = Color.Black.copy(alpha = 0.35f)
-            )
-            .clip(shape)
-    ) {
-        if (imageBitmap != null) {
-            Image(
-                bitmap = imageBitmap,
-                contentDescription = label,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            // Apple-style vibrant fallback gradient tile
-            val initials = if (label.isNotBlank()) label.take(1).uppercase() else "•"
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                Color(0xFF38BDF8),
-                                Color(0xFF6366F1),
-                                Color(0xFFA855F7)
-                            )
+    if (imageBitmap != null) {
+        // Render the natural native icon without artificial bounding box frames or clipping
+        Image(
+            bitmap = imageBitmap,
+            contentDescription = label,
+            contentScale = ContentScale.Fit,
+            modifier = modifier
+        )
+    } else {
+        // Fallback tile only if no native icon exists
+        val shape = RoundedCornerShape(cornerRadius ?: 12.dp)
+        val initials = if (label.isNotBlank()) label.take(1).uppercase() else "•"
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            Color(0xFF38BDF8),
+                            Color(0xFF6366F1),
+                            Color(0xFFA855F7)
                         )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = initials,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    style = androidx.compose.ui.text.TextStyle(
-                        shadow = androidx.compose.ui.graphics.Shadow(
-                            color = Color.Black.copy(alpha = 0.6f),
-                            blurRadius = 4f
-                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initials,
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                style = androidx.compose.ui.text.TextStyle(
+                    shadow = androidx.compose.ui.graphics.Shadow(
+                        color = Color.Black.copy(alpha = 0.6f),
+                        blurRadius = 4f
                     )
                 )
-            }
-        }
-
-        // Specular Apple Glass Bevel Rim
-        if (showSpecularBorder) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(
-                        width = 0.75.dp,
-                        brush = Brush.verticalGradient(
-                            listOf(
-                                Color.White.copy(alpha = 0.65f),
-                                Color.White.copy(alpha = 0.12f),
-                                Color.Transparent
-                            )
-                        ),
-                        shape = shape
-                    )
             )
         }
     }
